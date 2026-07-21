@@ -40,7 +40,7 @@ const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycby9cDPGlltI5
   <div class="mb-5 bg-purple-50 border border-purple-200 p-4 rounded-xl flex items-center justify-between gap-3 shadow-sm">
     <div class="flex-1">
       <label class="block text-xs font-bold text-purple-800 mb-1">📂 진행 중인 임시저장 불러오기</label>
-      <select id="draftSelect" class="w-full bg-white border border-purple-200 rounded-lg p-2 text-xs focus:outline-none">
+      <select id="draftSelect" onchange="loadSelectedDraft(this.value)" class="w-full bg-white border border-purple-200 rounded-lg p-2 text-xs focus:outline-none">
         <option value="">-- 새로 작성하기 --</option>
       </select>
     </div>
@@ -310,6 +310,7 @@ window.addEventListener('DOMContentLoaded', () => {
   buildDefectBlocks();
   buildCuppingScores();
   setupInteractions();
+  loadDraftList(); // 임시저장 목록 불러오기 추가
   
   // 모든 폼 인터랙션 시 실시간 연산기 업데이트
   document.getElementById('cuppingForm').addEventListener('input', updateRealtimePreview);
@@ -455,21 +456,23 @@ function updateRealtimePreview() {
   let unrefined = [];
   
   let tNote = val('cup_fl_top'), eNote = val('cup_fl_extra');
-  if(tNote) unrefined.push(`[Main Flavor] ${tNote}`);
-  else if(eNote) unrefined.push(`[Main Flavor] ${eNote}`);
-  if(tNote && eNote) unrefined.push(`[Extra Flavor] ${eNote}`);
+  let flavStr = "";
+  if(tNote) flavStr += `[Main Flavor] ${tNote}`;
+  else if(eNote) flavStr += `[Main Flavor] ${eNote}`;
+  if(tNote && eNote) flavStr += ` [Extra Flavor] ${eNote}`;
+  if(flavStr) unrefined.push(flavStr.trim());
 
   let acInt = getValSingle('grp_ac_int'), acType = getValMulti('grp_ac_type');
-  if(acInt || acType) unrefined.push(`\n[Acidity] ${acInt} ${acType}`.trim());
+  if(acInt || acType) unrefined.push(`[Acidity] ${acInt} ${acType}`.trim());
 
   let swInt = getValSingle('grp_sw_int');
-  if(swInt) unrefined.push(`\n[Sweetness] ${swInt}`);
+  if(swInt) unrefined.push(`[Sweetness] ${swInt}`);
 
   let mfInt = getValSingle('grp_mf_int'), mfNote = val('cup_mf_note');
-  if(mfInt || mfNote) unrefined.push(`\n[Mouthfeel] ${mfInt} ${mfNote}`.trim());
+  if(mfInt || mfNote) unrefined.push(`[Mouthfeel] ${mfInt} ${mfNote}`.trim());
 
   let afInt = getValSingle('grp_af_int'), afNote = val('cup_af_note');
-  if(afInt || afNote) unrefined.push(`\n[Aftertaste] ${afInt} ${afNote}`.trim());
+  if(afInt || afNote) unrefined.push(`[Aftertaste] ${afInt} ${afNote}`.trim());
 
   let cleanScore = parseFloat(val('sc_clean') || 0);
   let balScore = parseFloat(val('sc_bal') || 0);
@@ -480,9 +483,10 @@ function updateRealtimePreview() {
     if(cleanScore >= 6.5) ovArr.push("Clean");
     if(balScore >= 6.5) ovArr.push(cleanScore >= 6.5 ? "Well balanced" : "Balanced");
     if(ovNote) ovArr.push(ovNote);
-    unrefined.push(`\n[Overall] ` + ovArr.join(", "));
+    unrefined.push(`[Overall] ` + ovArr.join(", "));
   }
-  document.getElementById('preview_unrefined').value = unrefined.join(" ").replace(/\n /g, '\n').trim();
+  // 공백 결합이 아닌 줄바꿈(\n) 결합으로 변경
+  document.getElementById('preview_unrefined').value = unrefined.join('\n');
 
   // 2. Negative Notes
   let negative = [];
@@ -492,12 +496,11 @@ function updateRealtimePreview() {
   if(val('cup_ov_neg')) negative.push(`[Overall] ${val('cup_ov_neg')}`);
   
   let defInt = getValSingle('grp_def_int_ov'), defType = getValMulti('grp_def_typ_ov');
-  // 인텐시티가 None이 아닐 경우에만 표기
   if(defInt && defInt !== "None") {
     let dStr = `[Defect] ${defInt} ${defInt&&defType?', ':''}${defType}`.trim();
     negative.push(dStr);
   }
-  document.getElementById('preview_negative').value = negative.join("\n").trim();
+  document.getElementById('preview_negative').value = negative.join('\n');
 }
 
 // ==========================================
