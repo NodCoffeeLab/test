@@ -587,7 +587,21 @@ function getCuppingPayload(status) {
     rowId: currentDraftRowId,
     fields: {} 
   };
+  function getCuppingPayload(status) {
+  if (!currentDraftRowId) {
+    currentDraftRowId = "ID_" + Date.now();
+  }
+
+  let payload = { 
+    formType: "cupping", 
+    status: status || "Completed",
+    rowId: currentDraftRowId,
+    fields: {} 
+  };
   
+  // 💡 [여기에 추가!] 구글 시트 셀(BA열)에 ID가 직접 기록되도록 강제 주입
+  payload.fields["Row ID"] = currentDraftRowId;
+  payload.fields["Row_ID"] = currentDraftRowId;
   payload.fields["Coffee Name"] = val('cup_name');
   payload.fields["Lot Code"] = val('cup_lotCode');
   payload.fields["Lot Number"] = val('cup_lotNum');
@@ -1357,7 +1371,20 @@ function buildSamplePayload(i, status) {
     rowId = "ID_" + Date.now() + "_" + i; // 중복 방지를 위해 _i 추가
     if (container) container.dataset.rowId = rowId;
   }
+function buildSamplePayload(i, status) {
+  const f = {};
+  
+  const container = document.querySelector(`[data-sample-idx="${i}"]`);
+  let rowId = (container && container.dataset.rowId) ? container.dataset.rowId : null;
 
+  if (!rowId) {
+    rowId = "ID_" + Date.now() + "_" + i;
+    if (container) container.dataset.rowId = rowId;
+  }
+
+  // 💡 [여기에 추가!] 다중 폼에서도 시트 셀에 ID가 직접 기록되도록 강제 주입
+  f["Row ID"] = rowId;
+  f["Row_ID"] = rowId;
   f["Coffee Name"] = document.getElementById(`m_name_${i}`).value.trim();
   f["Lot Code"] = document.getElementById(`m_lotCode_${i}`).value.trim();
   f["Lot Number"] = document.getElementById(`m_lotNum_${i}`).value.trim();
