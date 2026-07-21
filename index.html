@@ -20,6 +20,7 @@
 <script>
 // 🛑 [필수 설정] 구글 앱스 스크립트 웹앱 주소
 const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxMfxfSapv5-_MkX0YVb5p1N3UwUz9mnLspWo6IrfPC7vmK9RTjY6733ObZhE2v489H/exec";
+
 // 🛑 [상태 관리] 현재 선택된 임시저장건의 시트 행 번호 및 캐시
 let currentDraftRowId = null;
 let loadedDraftsCache = [];
@@ -55,9 +56,8 @@ let loadedDraftsCache = [];
     <button type="button" id="tab-multi" onclick="switchMode('multi')" class="flex-1 py-2 text-sm font-bold rounded-md text-gray-500 hover:text-gray-700 transition-all">다중 일괄 폼 (태블릿)</button>
   </div>
 
+  <!-- 다중 폼 (태블릿) -->
   <form id="multiCuppingForm" class="hidden space-y-4">
-    
-    <!-- 상단 컨트롤 바 (샘플 수 제어 및 일괄 버튼) -->
     <div class="bg-white p-3 rounded-xl shadow-sm border flex flex-wrap items-center justify-between gap-2">
       <div class="flex items-center gap-3">
         <label class="text-xs font-bold text-gray-700">샘플 수</label>
@@ -87,15 +87,14 @@ let loadedDraftsCache = [];
       </div>
     </div>
 
-    <!-- 가로/세로 고정 스크롤 그리드 영역 -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-x-auto">
       <div id="multiGridContainer" class="p-3 min-w-[1000px] space-y-6">
-        <!-- JS에서 동적으로 2단 그리드 테이블 생성 -->
+        <!-- JS 동적 생성 -->
       </div>
     </div>
-
   </form>
   
+  <!-- 단일 폼 (모바일) -->
   <form id="cuppingForm" class="space-y-4">
     
     <!-- Group 1: 기본 정보 -->
@@ -131,7 +130,7 @@ let loadedDraftsCache = [];
         <span>2. 디펙트 (Defects)</span> <span class="arrow text-gray-400">▲</span>
       </button>
       <div class="accordion-content p-4 space-y-4" id="defect-container">
-        <!-- JS에서 4개 세트(Overall, Cup1, Cup2, Cup3) 렌더링 -->
+        <!-- JS 동적 렌더링 -->
       </div>
     </div>
 
@@ -142,7 +141,6 @@ let loadedDraftsCache = [];
       </button>
       <div class="accordion-content p-4 space-y-1">
         <div id="score-container" class="space-y-1"></div>
-        <!-- 총점 계산기 -->
         <div class="mt-4 pt-3 border-t border-purple-200 flex justify-between items-center bg-purple-100 p-3 rounded-lg">
           <span class="font-bold text-purple-900 text-sm">Total Score (합계 + 36)</span>
           <span id="cup_total_score" class="font-bold text-2xl text-purple-700">84.00</span>
@@ -349,6 +347,23 @@ let loadedDraftsCache = [];
       <button type="button" onclick="submitForm()" class="w-full py-4 bg-purple-600 text-white font-bold rounded-xl shadow-md text-sm active:scale-95 transition-transform">🚀 검사 완료</button>
     </div>
   </form>
+</div>
+
+<!-- 개별 / 다중 불러오기 공용 모달 -->
+<div id="draftModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-4 space-y-4">
+    <div class="flex justify-between items-center border-b pb-2">
+      <h3 id="draftModalTitle" class="font-bold text-sm text-gray-800">📂 임시저장 불러오기</h3>
+      <button type="button" onclick="closeDraftModal()" class="text-gray-400 font-bold hover:text-gray-600">✕</button>
+    </div>
+    <div id="draftModalList" class="max-h-60 overflow-y-auto space-y-2 text-xs">
+      <!-- JS 동적 생성 -->
+    </div>
+    <div class="flex justify-end gap-2 border-t pt-2">
+      <button type="button" onclick="closeDraftModal()" class="px-3 py-1.5 bg-gray-200 text-gray-700 rounded text-xs font-bold">취소</button>
+      <button type="button" id="draftModalConfirmBtn" class="px-3 py-1.5 bg-purple-600 text-white rounded text-xs font-bold">확인</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -558,7 +573,7 @@ function updateRealtimePreview() {
 }
 
 // ==========================================
-// 데이터 수집 및 서버 전송 (Airtable 헤더 매핑)
+// 데이터 수집 및 서버 전송 (단일 폼)
 // ==========================================
 function getCuppingPayload(status) {
   let payload = { 
@@ -1510,23 +1525,5 @@ function setCheckboxes(name, commaStr) {
   });
 }
 </script>
-
-<!-- 개별 / 다중 불러오기 공용 모달 -->
-<div id="draftModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-  <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-4 space-y-4">
-    <div class="flex justify-between items-center border-b pb-2">
-      <h3 id="draftModalTitle" class="font-bold text-sm text-gray-800">📂 임시저장 불러오기</h3>
-      <button type="button" onclick="closeDraftModal()" class="text-gray-400 font-bold hover:text-gray-600">✕</button>
-    </div>
-    <div id="draftModalList" class="max-h-60 overflow-y-auto space-y-2 text-xs">
-      <!-- JS 동적 생성 -->
-    </div>
-    <div class="flex justify-end gap-2 border-t pt-2">
-      <button type="button" onclick="closeDraftModal()" class="px-3 py-1.5 bg-gray-200 text-gray-700 rounded text-xs font-bold">취소</button>
-      <button type="button" id="draftModalConfirmBtn" class="px-3 py-1.5 bg-purple-600 text-white rounded text-xs font-bold">확인</button>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
