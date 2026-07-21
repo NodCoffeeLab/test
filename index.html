@@ -965,6 +965,57 @@ function calcMultiTotal(i) {
   if(totalEl) totalEl.innerText = sum.toFixed(2);
 }
 
+// ==========================================
+// 💡 image_e268cd 도면 완벽 일치 정밀 Flex/Grid 렌더러
+// ==========================================
+
+function toggleMultiSelect(id) {
+  const pop = document.getElementById(id + '_pop');
+  if(!pop) return;
+  document.querySelectorAll('[id$="_pop"]').forEach(el => {
+    if(el !== pop) el.classList.add('hidden');
+  });
+  pop.classList.toggle('hidden');
+}
+
+function acidityTypeBoxes(i) {
+  const types = ["Citric", "Malic", "Tartaric", "Lactic", "Acetic", "Phosphoric", "Butyric", "Succinic", "Other"];
+  return types.map(t => `
+    <label class="flex items-center gap-1.5 text-xs text-gray-800 cursor-pointer hover:bg-gray-100 p-1 rounded">
+      <input type="checkbox" name="m_ac_type_${i}" value="${t}" onchange="updateMultiLabel('m_ac_type_${i}_pop', 'm_ac_type_btn_${i}', 'Acidity 종류')" class="rounded text-purple-600 focus:ring-0"> ${t}
+    </label>
+  `).join('');
+}
+
+function defectTypeBoxes(i, cupKey) {
+  const types = ["Quaker", "Papery", "Woody", "Phenol", "Over-Fermented", "Leathery", "Stinker", "Others"];
+  return types.map(t => `
+    <label class="flex items-center gap-1.5 text-xs text-gray-800 cursor-pointer hover:bg-gray-100 p-1 rounded">
+      <input type="checkbox" name="m_def_typ_${cupKey}_${i}" value="${t}" onchange="updateMultiLabel('m_def_typ_${cupKey}_${i}_pop', 'm_def_typ_${cupKey}_btn_${i}', 'Defect 종류')" class="rounded text-purple-600 focus:ring-0"> ${t}
+    </label>
+  `).join('');
+}
+
+function roastPointBoxes(i, typeKey) {
+  const points = ["Light", "Medium-Light", "Medium", "Medium-Dark", "Dark"];
+  return points.map(p => `
+    <label class="flex items-center gap-1.5 text-xs text-gray-800 cursor-pointer hover:bg-gray-100 p-1 rounded">
+      <input type="checkbox" name="m_roast_${typeKey}_${i}" value="${p}" onchange="updateMultiLabel('m_roast_${typeKey}_${i}_pop', 'm_roast_${typeKey}_btn_${i}', 'Roasting point 선택')" class="rounded text-purple-600 focus:ring-0"> ${p}
+    </label>
+  `).join('');
+}
+
+function calcMultiTotal(i) {
+  const fields = ['clean', 'sweet', 'acid', 'mouth', 'flav', 'after', 'bal', 'over'];
+  let sum = 36;
+  fields.forEach(f => {
+    const el = document.getElementById(`m_sc_${f}_${i}`);
+    if(el) sum += parseFloat(el.value) || 0;
+  });
+  const totalEl = document.getElementById(`m_total_${i}`);
+  if(totalEl) totalEl.innerText = sum.toFixed(2);
+}
+
 function renderMultiGrid() {
   const container = document.getElementById('multiGridContainer');
   const count = parseInt(document.getElementById('multiSampleCount').value) || 6;
@@ -977,9 +1028,9 @@ function renderMultiGrid() {
 
   for (let i = 1; i <= count; i++) {
     html += `
-    <div class="border rounded-xl p-3 bg-white shadow-sm space-y-3" data-sample-idx="${i}">
+    <div class="border rounded-xl p-3 bg-white shadow-sm space-y-2 text-xs" data-sample-idx="${i}">
       
-      <!-- Sample Header & Sample-level Controls -->
+      <!-- Sample Header -->
       <div class="flex items-center justify-between bg-gray-100 p-2 rounded-lg border">
         <span class="font-bold text-gray-800 text-sm">☕ Sample #${i}</span>
         <div class="flex items-center gap-2">
@@ -989,19 +1040,19 @@ function renderMultiGrid() {
         </div>
       </div>
 
-      <!-- Main Layout Grid -->
-      <div class="grid grid-cols-12 gap-2 text-xs">
+      <!-- 메인 3개 독립 열 레이아웃 (좌측 / 중앙 / 우측) -->
+      <div class="flex gap-2 items-stretch">
 
-        <!-- 1. 좌측 1열: 커피 정보 & Score -->
-        <div class="col-span-2 space-y-2 flex flex-col justify-between">
-          <div class="border rounded-lg p-2 bg-gray-50/50 space-y-1.5">
+        <!-- 1. [좌측 열] 커피 정보 & Score -->
+        <div class="w-44 flex-shrink-0 flex flex-col justify-between gap-2">
+          <div class="border rounded-lg p-2 bg-gray-50/50 space-y-1 flex-1">
             <span class="font-bold text-gray-700 block border-b pb-1">커피 정보</span>
-            <input type="text" id="m_name_${i}" placeholder="Coffee Name" class="w-full p-1.5 border rounded bg-white">
-            <input type="text" id="m_lotCode_${i}" placeholder="Lot Code" class="w-full p-1.5 border rounded bg-white">
-            <input type="text" id="m_lotNum_${i}" placeholder="Lot Num" class="w-full p-1.5 border rounded bg-white">
-            <input type="date" id="m_date_${i}" class="w-full p-1.5 border rounded bg-white">
-            <input type="text" id="m_roast_${i}" placeholder="Roast Profile" class="w-full p-1.5 border rounded bg-white">
-            <select id="m_roaster_${i}" class="w-full p-1.5 border rounded bg-white font-medium">
+            <input type="text" id="m_name_${i}" placeholder="Coffee Name" class="w-full p-1 border rounded bg-white">
+            <input type="text" id="m_lotCode_${i}" placeholder="Lot Code" class="w-full p-1 border rounded bg-white">
+            <input type="text" id="m_lotNum_${i}" placeholder="Lot Num" class="w-full p-1 border rounded bg-white">
+            <input type="date" id="m_date_${i}" class="w-full p-1 border rounded bg-white">
+            <input type="text" id="m_roast_${i}" placeholder="Roast Profile" class="w-full p-1 border rounded bg-white">
+            <select id="m_roaster_${i}" class="w-full p-1 border rounded bg-white font-medium">
               <option value="">Roaster 선택</option>
               <option value="Ikawa V3">Ikawa V3</option>
               <option value="Ikawa Pro 100">Ikawa Pro 100</option>
@@ -1019,171 +1070,178 @@ function renderMultiGrid() {
           </div>
         </div>
 
-        <!-- 2. 중앙 + 우측 영역 -->
-        <div class="col-span-10 space-y-2">
+        <!-- 2. [중앙 영역] 상단 4개 구역 / 하단 3개 구역 -->
+        <div class="flex-1 flex flex-col justify-between gap-2">
 
-          <!-- [상단 행] Clean / Sweet / Acidity / Mouthfeel / Aftertaste / Overall 노트 -->
-          <div class="grid grid-cols-12 gap-2">
-            <!-- Clean -->
-            <div class="col-span-1 border rounded-lg p-2 bg-gray-50/50 space-y-1">
-              <span class="font-bold text-gray-700 block">Clean</span>
-              <input type="number" id="m_sc_clean_${i}" value="6.00" step="0.25" onchange="calcMultiTotal(${i})" class="w-full p-1.5 border rounded bg-white text-center font-bold">
-            </div>
-
-            <!-- Sweet -->
-            <div class="col-span-1 border rounded-lg p-2 bg-gray-50/50 space-y-1">
-              <span class="font-bold text-gray-700 block">Sweet</span>
-              <input type="number" id="m_sc_sweet_${i}" value="6.00" step="0.25" onchange="calcMultiTotal(${i})" class="w-full p-1.5 border rounded bg-white text-center font-bold">
-              <select id="m_sw_int_${i}" class="w-full p-1 border rounded bg-white font-medium text-[11px]">${intensityOpts}</select>
-            </div>
-
-            <!-- Acidity -->
-            <div class="col-span-2 border rounded-lg p-2 bg-gray-50/50 space-y-1">
-              <span class="font-bold text-gray-700 block">Acidity</span>
-              <div class="grid grid-cols-2 gap-1">
-                <input type="number" id="m_sc_acid_${i}" value="6.00" step="0.25" onchange="calcMultiTotal(${i})" class="p-1.5 border rounded bg-white text-center font-bold">
-                <select id="m_ac_int_${i}" class="p-1 border rounded bg-white font-medium text-[11px]">${intensityOpts}</select>
+          <!-- 중앙 상단 행 -->
+          <div class="flex gap-2 h-[140px]">
+            
+            <!-- Clean & Sweet (세로 배치) -->
+            <div class="w-28 flex-shrink-0 border rounded-lg p-1.5 bg-gray-50/50 flex flex-col justify-between">
+              <div>
+                <span class="font-bold text-gray-700 block mb-1">Clean</span>
+                <input type="number" id="m_sc_clean_${i}" value="6.00" step="0.25" onchange="calcMultiTotal(${i})" class="w-full p-1 border rounded bg-white text-center font-bold">
               </div>
-              <div class="relative">
-                <button type="button" id="m_ac_type_btn_${i}" onclick="toggleMultiSelect('m_ac_type_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate">Acidity 종류 ▼</button>
-                <div id="m_ac_type_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-48 bg-white border shadow-lg rounded p-2 z-20 space-y-1">
-                  ${acidityTypeBoxes(i)}
+              <div class="border-t pt-1">
+                <span class="font-bold text-gray-700 block mb-1">Sweet</span>
+                <input type="number" id="m_sc_sweet_${i}" value="6.00" step="0.25" onchange="calcMultiTotal(${i})" class="w-full p-1 border rounded bg-white text-center font-bold mb-1">
+                <select id="m_sw_int_${i}" class="w-full p-0.5 border rounded bg-white font-medium text-[10px]">${intensityOpts}</select>
+              </div>
+            </div>
+
+            <!-- Acidity (좌: 점수/강도, 우: 세로 가득 찬 Acidity 종류) -->
+            <div class="w-48 flex-shrink-0 border rounded-lg p-1.5 bg-gray-50/50 flex flex-col">
+              <span class="font-bold text-gray-700 block mb-1">Acidity</span>
+              <div class="flex gap-1.5 flex-1">
+                <div class="w-20 space-y-1 flex flex-col justify-center">
+                  <input type="number" id="m_sc_acid_${i}" value="6.00" step="0.25" onchange="calcMultiTotal(${i})" class="w-full p-1 border rounded bg-white text-center font-bold">
+                  <select id="m_ac_int_${i}" class="w-full p-0.5 border rounded bg-white font-medium text-[10px]">${intensityOpts}</select>
+                </div>
+                <div class="flex-1 h-full relative">
+                  <button type="button" id="m_ac_type_btn_${i}" onclick="toggleMultiSelect('m_ac_type_${i}')" class="w-full h-full border rounded bg-white text-gray-700 font-medium text-center flex items-center justify-center p-1">Acidity 종류 ▼</button>
+                  <div id="m_ac_type_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-44 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
+                    ${acidityTypeBoxes(i)}
+                  </div>
                 </div>
               </div>
             </div>
 
             <!-- Mouthfeel -->
-            <div class="col-span-3 border rounded-lg p-2 bg-gray-50/50 space-y-1">
+            <div class="flex-1 border rounded-lg p-1.5 bg-gray-50/50 flex flex-col justify-between">
               <span class="font-bold text-gray-700 block">Mouthfeel</span>
               <div class="grid grid-cols-2 gap-1">
-                <input type="number" id="m_sc_mouth_${i}" value="6.00" step="0.25" onchange="calcMultiTotal(${i})" class="p-1.5 border rounded bg-white text-center font-bold">
-                <select id="m_mf_int_${i}" class="p-1 border rounded bg-white font-medium text-[11px]">${mfOpts}</select>
+                <input type="number" id="m_sc_mouth_${i}" value="6.00" step="0.25" onchange="calcMultiTotal(${i})" class="p-1 border rounded bg-white text-center font-bold">
+                <select id="m_mf_int_${i}" class="p-0.5 border rounded bg-white font-medium text-[10px]">${mfOpts}</select>
               </div>
               <input type="text" id="m_mf_note_${i}" placeholder="Mouthfeel 노트" class="w-full p-1 border rounded bg-white">
               <input type="text" id="m_mf_neg_${i}" placeholder="Mouthfeel Negative" class="w-full p-1 border rounded bg-white text-gray-500">
             </div>
 
             <!-- Aftertaste -->
-            <div class="col-span-3 border rounded-lg p-2 bg-gray-50/50 space-y-1">
+            <div class="flex-1 border rounded-lg p-1.5 bg-gray-50/50 flex flex-col justify-between">
               <span class="font-bold text-gray-700 block">Aftertaste</span>
               <div class="grid grid-cols-2 gap-1">
-                <input type="number" id="m_sc_after_${i}" value="6.00" step="0.25" onchange="calcMultiTotal(${i})" class="p-1.5 border rounded bg-white text-center font-bold">
-                <select id="m_af_int_${i}" class="p-1 border rounded bg-white font-medium text-[11px]">${afOpts}</select>
+                <input type="number" id="m_sc_after_${i}" value="6.00" step="0.25" onchange="calcMultiTotal(${i})" class="p-1 border rounded bg-white text-center font-bold">
+                <select id="m_af_int_${i}" class="p-0.5 border rounded bg-white font-medium text-[10px]">${afOpts}</select>
               </div>
               <input type="text" id="m_af_note_${i}" placeholder="Aftertaste 노트" class="w-full p-1 border rounded bg-white">
               <input type="text" id="m_af_neg_${i}" placeholder="Aftertaste Negative" class="w-full p-1 border rounded bg-white text-gray-500">
             </div>
 
-            <!-- Overall 노트 (우상단 독립) -->
-            <div class="col-span-2 border rounded-lg p-2 bg-gray-50/50 space-y-1">
-              <span class="font-bold text-gray-700 block">Overall</span>
-              <textarea id="m_ov_note_${i}" rows="2" placeholder="Overall 노트" class="w-full p-1 border rounded bg-white resize-none"></textarea>
-              <textarea id="m_ov_neg_${i}" rows="2" placeholder="Overall Negative" class="w-full p-1 border rounded bg-white text-gray-500 resize-none"></textarea>
-            </div>
           </div>
 
-          <!-- [중단 행] Defect / Flavour / Balance & Overall / Roasting Point -->
-          <div class="grid grid-cols-12 gap-2">
+          <!-- 중앙 하단 행 -->
+          <div class="flex gap-2 h-[155px]">
+            
             <!-- Defect -->
-            <div class="col-span-4 border rounded-lg p-2 bg-gray-50/50 space-y-1">
-              <span class="font-bold text-gray-700 block mb-0.5">Defect</span>
+            <div class="w-64 flex-shrink-0 border rounded-lg p-1.5 bg-gray-50/50 flex flex-col justify-between">
+              <span class="font-bold text-gray-700 block">Defect</span>
               
-              <!-- Overall Defect -->
               <div class="flex items-center gap-1">
                 <span class="w-10 text-[10px] font-semibold text-gray-600">Overall</span>
-                <select id="m_def_int_ov_${i}" class="w-20 p-1 border rounded bg-white text-[11px]">${intensityOpts}<option value="None" selected>None</option></select>
+                <select id="m_def_int_ov_${i}" class="w-16 p-0.5 border rounded bg-white text-[10px]">${intensityOpts}<option value="None" selected>None</option></select>
                 <div class="relative flex-1">
-                  <button type="button" id="m_def_typ_ov_btn_${i}" onclick="toggleMultiSelect('m_def_typ_ov_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate">Defect 종류 ▼</button>
-                  <div id="m_def_typ_ov_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-48 bg-white border shadow-lg rounded p-2 z-20 space-y-1">
+                  <button type="button" id="m_def_typ_ov_btn_${i}" onclick="toggleMultiSelect('m_def_typ_ov_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate text-[10px]">Defect 종류 ▼</button>
+                  <div id="m_def_typ_ov_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-44 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
                     ${defectTypeBoxes(i, 'ov')}
                   </div>
                 </div>
               </div>
 
-              <!-- Cup1 -->
               <div class="flex items-center gap-1">
                 <span class="w-10 text-[10px] font-semibold text-gray-600">Cup1</span>
-                <select id="m_def_int_c1_${i}" class="w-20 p-1 border rounded bg-white text-[11px]">${intensityOpts}<option value="None" selected>None</option></select>
+                <select id="m_def_int_c1_${i}" class="w-16 p-0.5 border rounded bg-white text-[10px]">${intensityOpts}<option value="None" selected>None</option></select>
                 <div class="relative flex-1">
-                  <button type="button" id="m_def_typ_c1_btn_${i}" onclick="toggleMultiSelect('m_def_typ_c1_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate">Defect 종류 ▼</button>
-                  <div id="m_def_typ_c1_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-48 bg-white border shadow-lg rounded p-2 z-20 space-y-1">
+                  <button type="button" id="m_def_typ_c1_btn_${i}" onclick="toggleMultiSelect('m_def_typ_c1_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate text-[10px]">Defect 종류 ▼</button>
+                  <div id="m_def_typ_c1_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-44 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
                     ${defectTypeBoxes(i, 'c1')}
                   </div>
                 </div>
               </div>
 
-              <!-- Cup2 -->
               <div class="flex items-center gap-1">
                 <span class="w-10 text-[10px] font-semibold text-gray-600">Cup2</span>
-                <select id="m_def_int_c2_${i}" class="w-20 p-1 border rounded bg-white text-[11px]">${intensityOpts}<option value="None" selected>None</option></select>
+                <select id="m_def_int_c2_${i}" class="w-16 p-0.5 border rounded bg-white text-[10px]">${intensityOpts}<option value="None" selected>None</option></select>
                 <div class="relative flex-1">
-                  <button type="button" id="m_def_typ_c2_btn_${i}" onclick="toggleMultiSelect('m_def_typ_c2_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate">Defect 종류 ▼</button>
-                  <div id="m_def_typ_c2_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-48 bg-white border shadow-lg rounded p-2 z-20 space-y-1">
+                  <button type="button" id="m_def_typ_c2_btn_${i}" onclick="toggleMultiSelect('m_def_typ_c2_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate text-[10px]">Defect 종류 ▼</button>
+                  <div id="m_def_typ_c2_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-44 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
                     ${defectTypeBoxes(i, 'c2')}
                   </div>
                 </div>
               </div>
 
-              <!-- Cup3 -->
               <div class="flex items-center gap-1">
                 <span class="w-10 text-[10px] font-semibold text-gray-600">Cup3</span>
-                <select id="m_def_int_c3_${i}" class="w-20 p-1 border rounded bg-white text-[11px]">${intensityOpts}<option value="None" selected>None</option></select>
+                <select id="m_def_int_c3_${i}" class="w-16 p-0.5 border rounded bg-white text-[10px]">${intensityOpts}<option value="None" selected>None</option></select>
                 <div class="relative flex-1">
-                  <button type="button" id="m_def_typ_c3_btn_${i}" onclick="toggleMultiSelect('m_def_typ_c3_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate">Defect 종류 ▼</button>
-                  <div id="m_def_typ_c3_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-48 bg-white border shadow-lg rounded p-2 z-20 space-y-1">
+                  <button type="button" id="m_def_typ_c3_btn_${i}" onclick="toggleMultiSelect('m_def_typ_c3_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate text-[10px]">Defect 종류 ▼</button>
+                  <div id="m_def_typ_c3_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-44 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
                     ${defectTypeBoxes(i, 'c3')}
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Flavour (Textarea로 넉넉한 입력 공간 확보) -->
-            <div class="col-span-4 border rounded-lg p-2 bg-gray-50/50 space-y-1.5">
+            <!-- Flavour -->
+            <div class="flex-1 border rounded-lg p-1.5 bg-gray-50/50 flex flex-col justify-between">
               <span class="font-bold text-gray-700 block">Flavour</span>
-              <div class="grid grid-cols-12 gap-1.5">
-                <div class="col-span-4 space-y-1">
-                  <input type="number" id="m_sc_flav_${i}" value="6.00" step="0.25" onchange="calcMultiTotal(${i})" class="w-full p-1.5 border rounded bg-white text-center font-bold">
-                  <select id="m_fl_int_${i}" class="w-full p-1 border rounded bg-white text-[11px]">${intensityOpts}</select>
+              <div class="flex gap-1.5 flex-1">
+                <div class="w-20 space-y-1 flex flex-col justify-center">
+                  <input type="number" id="m_sc_flav_${i}" value="6.00" step="0.25" onchange="calcMultiTotal(${i})" class="w-full p-1 border rounded bg-white text-center font-bold">
+                  <select id="m_fl_int_${i}" class="w-full p-0.5 border rounded bg-white text-[10px]">${intensityOpts}</select>
                 </div>
-                <div class="col-span-8 space-y-1">
-                  <textarea id="m_fl_top_${i}" rows="2" placeholder="Top notes" class="w-full p-1 border rounded bg-white resize-none"></textarea>
-                  <textarea id="m_fl_extra_${i}" rows="2" placeholder="Extra notes" class="w-full p-1 border rounded bg-white resize-none"></textarea>
+                <div class="flex-1 space-y-1 flex flex-col justify-between">
+                  <input type="text" id="m_fl_top_${i}" placeholder="Top notes" class="w-full p-1 border rounded bg-white flex-1">
+                  <input type="text" id="m_fl_extra_${i}" placeholder="Extra notes" class="w-full p-1 border rounded bg-white flex-1">
                 </div>
               </div>
               <input type="text" id="m_fl_neg_${i}" placeholder="Flavour Negative" class="w-full p-1 border rounded bg-white text-gray-500">
             </div>
 
-            <!-- Balance & Overall 점수 -->
-            <div class="col-span-2 space-y-1.5">
-              <div class="border rounded-lg p-2 bg-gray-50/50 space-y-1">
-                <span class="font-bold text-gray-700 block">Balance</span>
-                <input type="number" id="m_sc_bal_${i}" value="6.00" step="0.25" onchange="calcMultiTotal(${i})" class="w-full p-1.5 border rounded bg-white text-center font-bold">
+            <!-- Balance & Overall 점수 (세로 스택) -->
+            <div class="w-24 flex-shrink-0 flex flex-col justify-between gap-1">
+              <div class="border rounded-lg p-1.5 bg-gray-50/50 flex-1 flex flex-col justify-center">
+                <span class="font-bold text-gray-700 block mb-1">Balance</span>
+                <input type="number" id="m_sc_bal_${i}" value="6.00" step="0.25" onchange="calcMultiTotal(${i})" class="w-full p-1 border rounded bg-white text-center font-bold">
               </div>
-              <div class="border rounded-lg p-2 bg-gray-50/50 space-y-1">
-                <span class="font-bold text-gray-700 block">Overall</span>
-                <input type="number" id="m_sc_over_${i}" value="6.00" step="0.25" onchange="calcMultiTotal(${i})" class="w-full p-1.5 border rounded bg-white text-center font-bold">
+              <div class="border rounded-lg p-1.5 bg-gray-50/50 flex-1 flex flex-col justify-center">
+                <span class="font-bold text-gray-700 block mb-1">Overall</span>
+                <input type="number" id="m_sc_over_${i}" value="6.00" step="0.25" onchange="calcMultiTotal(${i})" class="w-full p-1 border rounded bg-white text-center font-bold">
               </div>
             </div>
 
-            <!-- Roasting Point (우하단 독립) -->
-            <div class="col-span-2 border rounded-lg p-2 bg-gray-50/50 space-y-2">
-              <div>
-                <span class="font-bold text-gray-700 block text-[11px] mb-0.5">Possible Roasting point</span>
-                <div class="relative">
-                  <button type="button" id="m_roast_pos_btn_${i}" onclick="toggleMultiSelect('m_roast_pos_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate">Roasting point 선택 ▼</button>
-                  <div id="m_roast_pos_${i}_pop" class="hidden absolute left-0 bottom-full mb-1 w-48 bg-white border shadow-lg rounded p-2 z-20 space-y-1">
-                    ${roastPointBoxes(i, 'pos')}
-                  </div>
+          </div>
+
+        </div>
+
+        <!-- 3. [우측 독립 열] (Overall 노트 / Roasting Point) -->
+        <div class="w-48 flex-shrink-0 flex flex-col justify-between gap-2">
+          
+          <!-- Overall 노트 (상단) -->
+          <div class="border rounded-lg p-2 bg-gray-50/50 space-y-1.5 flex-1 flex flex-col justify-between">
+            <span class="font-bold text-gray-700 block border-b pb-1">Overall</span>
+            <textarea id="m_ov_note_${i}" rows="2" placeholder="Overall 노트" class="w-full p-1.5 border rounded bg-white resize-none flex-1"></textarea>
+            <textarea id="m_ov_neg_${i}" rows="2" placeholder="Overall Negative" class="w-full p-1.5 border rounded bg-white text-gray-500 resize-none flex-1"></textarea>
+          </div>
+
+          <!-- Roasting Point (하단) -->
+          <div class="border rounded-lg p-2 bg-gray-50/50 space-y-2">
+            <div>
+              <span class="font-bold text-gray-700 block text-[11px] mb-0.5">Possible Roasting point</span>
+              <div class="relative">
+                <button type="button" id="m_roast_pos_btn_${i}" onclick="toggleMultiSelect('m_roast_pos_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate text-[10px]">Roasting point 선택 ▼</button>
+                <div id="m_roast_pos_${i}_pop" class="hidden absolute right-0 top-full mt-1 w-44 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
+                  ${roastPointBoxes(i, 'pos')}
                 </div>
               </div>
+            </div>
 
-              <div>
-                <span class="font-bold text-gray-700 block text-[11px] mb-0.5">Roasting point Recommendation</span>
-                <div class="relative">
-                  <button type="button" id="m_roast_rec_btn_${i}" onclick="toggleMultiSelect('m_roast_rec_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate">Roasting point 선택 ▼</button>
-                  <div id="m_roast_rec_${i}_pop" class="hidden absolute left-0 bottom-full mb-1 w-48 bg-white border shadow-lg rounded p-2 z-20 space-y-1">
-                    ${roastPointBoxes(i, 'rec')}
-                  </div>
+            <div>
+              <span class="font-bold text-gray-700 block text-[11px] mb-0.5">Roasting point Recommendation</span>
+              <div class="relative">
+                <button type="button" id="m_roast_rec_btn_${i}" onclick="toggleMultiSelect('m_roast_rec_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate text-[10px]">Roasting point 선택 ▼</button>
+                <div id="m_roast_rec_${i}_pop" class="hidden absolute right-0 top-full mt-1 w-44 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
+                  ${roastPointBoxes(i, 'rec')}
                 </div>
               </div>
             </div>
@@ -1191,16 +1249,16 @@ function renderMultiGrid() {
 
         </div>
 
-        <!-- 3. 하단 열: Comment (Textarea 분량 확보) -->
-        <div class="col-span-12 border rounded-lg p-2 bg-gray-50/50 space-y-1">
-          <span class="font-bold text-gray-700 block">Comment</span>
-          <div class="grid grid-cols-3 gap-2">
-            <textarea id="m_shortDesc_${i}" rows="3" placeholder="Short Description" class="w-full p-2 border rounded bg-white resize-none"></textarea>
-            <textarea id="m_priceNote_${i}" rows="3" placeholder="Price List Notes" class="w-full p-2 border rounded bg-white resize-none"></textarea>
-            <textarea id="m_comm_${i}" rows="3" placeholder="Sensory Quality Comment" class="w-full p-2 border rounded bg-white resize-none"></textarea>
-          </div>
-        </div>
+      </div>
 
+      <!-- 4. [하단 전체 열] Comment (3분할) -->
+      <div class="border rounded-lg p-2 bg-gray-50/50 space-y-1">
+        <span class="font-bold text-gray-700 block">Comment</span>
+        <div class="grid grid-cols-3 gap-2">
+          <textarea id="m_shortDesc_${i}" rows="2" placeholder="Short Description" class="w-full p-1.5 border rounded bg-white resize-none"></textarea>
+          <textarea id="m_priceNote_${i}" rows="2" placeholder="Price List Notes" class="w-full p-1.5 border rounded bg-white resize-none"></textarea>
+          <textarea id="m_comm_${i}" rows="2" placeholder="Sensory Quality Comment" class="w-full p-1.5 border rounded bg-white resize-none"></textarea>
+        </div>
       </div>
 
     </div>
