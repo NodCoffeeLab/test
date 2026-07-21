@@ -54,7 +54,7 @@ const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycby9cDPGlltI5
         <span>1. 기본 정보</span> <span class="arrow text-gray-400">▲</span>
       </button>
       <div class="accordion-content p-4 space-y-3">
-        <div><label class="block text-xs font-semibold mb-1">Coffee Name</label><input type="text" id="cup_name" class="w-full p-2 border rounded-lg text-sm bg-gray-50"</div>
+        <div><label class="block text-xs font-semibold mb-1">Coffee Name</label><input type="text" id="cup_name" class="w-full p-2 border rounded-lg text-sm bg-gray-50"></div>
         <div class="grid grid-cols-2 gap-3">
           <div><label class="block text-xs font-semibold mb-1">Lot Code</label><input type="text" id="cup_lotCode" class="w-full p-2 border rounded-lg text-sm"></div>
           <div><label class="block text-xs font-semibold mb-1">Lot Number</label><input type="text" id="cup_lotNum" class="w-full p-2 border rounded-lg text-sm"></div>
@@ -569,11 +569,15 @@ function getCuppingPayload() {
 
 function saveDraft() {
   const data = getCuppingPayload();
-  if(!data.fields["Coffee Name"]) {
+  const coffeeName = data.fields["Coffee Name"];
+  if(!coffeeName) {
     alert("Coffee Name을 먼저 입력해주세요.");
     return;
   }
-  localStorage.setItem("draft_cupping_" + data.fields["Coffee Name"], JSON.stringify(data));
+  const key = "draft_cupping_" + coffeeName;
+  localStorage.setItem(key, JSON.stringify(data));
+  loadDraftList();
+  document.getElementById('draftSelect').value = key;
   alert("💾 임시저장이 완료되었습니다.");
 }
 
@@ -598,11 +602,126 @@ function submitForm() {
     alert("🚀 전송이 완료되었습니다!");
     btn.innerText = originText;
     btn.disabled = false;
-    localStorage.removeItem("draft_cupping_" + data.fields["Coffee Name"]);
+localStorage.removeItem("draft_cupping_" + data.fields["Coffee Name"]);
+    loadDraftList();
   }).catch(e => {
     alert("오류 발생. 관리자에게 문의하세요.");
     btn.innerText = originText;
     btn.disabled = false;
+  });
+}
+  function loadDraftList() {
+  const select = document.getElementById('draftSelect');
+  const currentVal = select.value;
+  select.innerHTML = '<option value="">-- 새로 작성하기 --</option>';
+  
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('draft_cupping_')) {
+      const name = key.replace('draft_cupping_', '');
+      const opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = `📂 ${name}`;
+      select.appendChild(opt);
+    }
+  }
+  select.value = currentVal;
+}
+
+function loadSelectedDraft(key) {
+  if(!key) {
+    document.getElementById('cuppingForm').reset();
+    clearAllActiveButtons();
+    buildCuppingScores();
+    updateRealtimePreview();
+    return;
+  }
+  const raw = localStorage.getItem(key);
+  if(!raw) return;
+  
+  const data = JSON.parse(raw);
+  const f = data.fields || {};
+
+  document.getElementById('cup_name').value = f["Coffee Name"] || "";
+  document.getElementById('cup_lotCode').value = f["Lot Code"] || "";
+  document.getElementById('cup_lotNum').value = f["Lot Number"] || "";
+  document.getElementById('cup_date').value = f["Cupping Date"] || new Date().toISOString().substring(0, 10);
+  document.getElementById('cup_roastProfile').value = f["Roasting Profile"] || "";
+  
+  setValSingle('group_roaster', f["Roaster"]);
+
+  const defBlocks = [
+    {id: 'ov', kInt: 'Defect-Intensity', kTyp: 'Defect-Type'},
+    {id: 'c1', kInt: 'Defect-Intensity (Cup1)', kTyp: 'Defect-Type (Cup1)'},
+    {id: 'c2', kInt: 'Defect-Intensity (Cup2)', kTyp: 'Defect-Type (Cup2)'},
+    {id: 'c3', kInt: 'Defect-Intensity (Cup3)', kTyp: 'Defect-Type (Cup3)'}
+  ];
+  defBlocks.forEach(b => {
+    setValSingle('grp_def_int_' + b.id, f[b.kInt] || "None");
+    setValMulti('grp_def_typ_' + b.id, f[b.kTyp] || "");
+  });
+
+  SCORE_FIELDS.forEach(sf => {
+    if(f[sf.key] !== undefined) {
+      const input = document.getElementById(sf.id);
+      if(input) input.value = parseFloat(f[sf.key]).toFixed(2);
+    }
+  });
+  calcTotalScore();
+
+  setValSingle('grp_fl_int', f["Flavour-Intensity"]);
+  document.getElementById('cup_fl_top').value = f["Main Flavour-Top Notes"] || "";
+  document.getElementById('cup_fl_extra').value = f["Flavour-Extra Notes"] || "";
+  document.getElementById('cup_fl_neg').value = f["Flavour-Negative"] || "";
+
+  setValSingle('grp_af_int', f["Aftertaste-Intensity"]);
+  document.getElementById('cup_af_note').value = f["Aftertaste-Notes"] || "";
+  document.getElementById('cup_af_neg').value = f["Aftertaste-Negative"] || "";
+
+  setValSingle('grp_ac_int', f["Acidity-Intensity"]);
+  setValMulti('grp_ac_type', f["Acidity-Type"]);
+
+  setValSingle('grp_sw_int', f["Sweetness-Intensity"]);
+
+  setValSingle('grp_mf_int', f["Mouthfeel-Intensity"]);
+  document.getElementById('cup_mf_note').value = f["Mouthfeel-Notes"] || "";
+  document.getElementById('cup_mf_neg').value = f["Mouthfeel-Negative"] || "";
+
+  document.getElementById('cup_ov_note').value = f["Overall-Notes"] || "";
+  document.getElementById('cup_ov_neg').value = f["Overall-Negative"] || "";
+
+  setValMulti('grp_roast_pos', f["Possible Roasting point"]);
+  setValMulti('grp_roast_rec', f["Roasting point Recommendation"]);
+  document.getElementById('cup_qualityComm').value = f["Sensory Quality Comment"] || "";
+  document.getElementById('cup_shortDesc').value = f["Short description"] || "";
+  document.getElementById('cup_priceNote').value = f["Price list Notes"] || "";
+
+  updateRealtimePreview();
+}
+
+function clearAllActiveButtons() {
+  document.querySelectorAll('.select-single, .select-multi').forEach(b => b.classList.remove('active-btn'));
+  ['ov', 'c1', 'c2', 'c3'].forEach(id => {
+    setValSingle('grp_def_int_' + id, 'None');
+  });
+}
+
+function setValSingle(groupId, valStr) {
+  const parent = document.getElementById(groupId);
+  if(!parent) return;
+  parent.querySelectorAll('.select-single').forEach(b => {
+    if(valStr && b.innerText.trim() === valStr.trim()) b.classList.add('active-btn');
+    else b.classList.remove('active-btn');
+  });
+}
+
+function setValMulti(groupId, commaStr) {
+  const parent = document.getElementById(groupId);
+  if(!parent) return;
+  const list = commaStr ? commaStr.split(',').map(s => s.trim()) : [];
+  parent.querySelectorAll('.select-multi').forEach(b => {
+    if(list.includes(b.innerText.trim())) b.classList.add('active-btn');
+    else b.classList.remove('active-btn');
   });
 }
 </script>
