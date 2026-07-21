@@ -150,7 +150,7 @@ let loadedDraftsCache = [];
       </div>
     </div>
 
-    <!-- Group 4: 향미 상세 -->
+<!-- Group 4: 향미 상세 -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <button type="button" class="w-full px-4 py-3 bg-gray-50 flex justify-between font-bold text-sm border-b" onclick="toggleAcc(this)">
         <span>4. 향미 상세 (Notes & Intensity)</span> <span class="arrow text-gray-400">▲</span>
@@ -171,15 +171,15 @@ let loadedDraftsCache = [];
           <div class="space-y-2">
             <div>
               <label class="block text-xs font-semibold text-gray-600 mb-1">Top Notes</label>
-              <input type="text" id="cup_fl_top" class="w-full p-2 border rounded text-xs bg-gray-50">
+              <textarea id="cup_fl_top" rows="2" class="w-full p-2 border rounded text-xs bg-gray-50 resize-none overflow-y-auto"></textarea>
             </div>
             <div>
               <label class="block text-xs font-semibold text-gray-600 mb-1">Extra Notes</label>
-              <input type="text" id="cup_fl_extra" class="w-full p-2 border rounded text-xs bg-gray-50">
+              <textarea id="cup_fl_extra" rows="2" class="w-full p-2 border rounded text-xs bg-gray-50 resize-none overflow-y-auto"></textarea>
             </div>
             <div>
               <label class="block text-xs font-semibold text-red-600 mb-1">Negative Notes</label>
-              <input type="text" id="cup_fl_neg" class="w-full p-2 border border-red-200 bg-red-50 rounded text-xs text-red-800">
+              <textarea id="cup_fl_neg" rows="2" class="w-full p-2 border border-red-200 bg-red-50 rounded text-xs text-red-800 resize-none overflow-y-auto"></textarea>
             </div>
           </div>
         </div>
@@ -198,11 +198,11 @@ let loadedDraftsCache = [];
           <div class="space-y-2">
             <div>
               <label class="block text-xs font-semibold text-gray-600 mb-1">Aftertaste Notes</label>
-              <input type="text" id="cup_af_note" class="w-full p-2 border rounded text-xs bg-gray-50">
+              <textarea id="cup_af_note" rows="2" class="w-full p-2 border rounded text-xs bg-gray-50 resize-none overflow-y-auto"></textarea>
             </div>
             <div>
               <label class="block text-xs font-semibold text-red-600 mb-1">Negative Notes</label>
-              <input type="text" id="cup_af_neg" class="w-full p-2 border border-red-200 bg-red-50 rounded text-xs text-red-800">
+              <textarea id="cup_af_neg" rows="2" class="w-full p-2 border border-red-200 bg-red-50 rounded text-xs text-red-800 resize-none overflow-y-auto"></textarea>
             </div>
           </div>
         </div>
@@ -259,11 +259,11 @@ let loadedDraftsCache = [];
           <div class="space-y-2">
             <div>
               <label class="block text-xs font-semibold text-gray-600 mb-1">Mouthfeel Notes</label>
-              <input type="text" id="cup_mf_note" class="w-full p-2 border rounded text-xs bg-gray-50">
+              <textarea id="cup_mf_note" rows="2" class="w-full p-2 border rounded text-xs bg-gray-50 resize-none overflow-y-auto"></textarea>
             </div>
             <div>
               <label class="block text-xs font-semibold text-red-600 mb-1">Negative Notes</label>
-              <input type="text" id="cup_mf_neg" class="w-full p-2 border border-red-200 bg-red-50 rounded text-xs text-red-800">
+              <textarea id="cup_mf_neg" rows="2" class="w-full p-2 border border-red-200 bg-red-50 rounded text-xs text-red-800 resize-none overflow-y-auto"></textarea>
             </div>
           </div>
         </div>
@@ -274,11 +274,11 @@ let loadedDraftsCache = [];
           <div class="space-y-2">
             <div>
               <label class="block text-xs font-semibold text-gray-600 mb-1">Overall Notes</label>
-              <input type="text" id="cup_ov_note" class="w-full p-2 border rounded text-xs bg-gray-50">
+              <textarea id="cup_ov_note" rows="2" class="w-full p-2 border rounded text-xs bg-gray-50 resize-none overflow-y-auto"></textarea>
             </div>
             <div>
               <label class="block text-xs font-semibold text-red-600 mb-1">Negative Notes</label>
-              <input type="text" id="cup_ov_neg" class="w-full p-2 border border-red-200 bg-red-50 rounded text-xs text-red-800">
+              <textarea id="cup_ov_neg" rows="2" class="w-full p-2 border border-red-200 bg-red-50 rounded text-xs text-red-800 resize-none overflow-y-auto"></textarea>
             </div>
           </div>
         </div>
@@ -315,16 +315,16 @@ let loadedDraftsCache = [];
         </div>
         <div>
           <label class="block text-xs font-semibold mb-1 text-purple-700">Sensory Quality Comment</label>
-          <textarea id="cup_qualityComm" rows="3" class="w-full p-2 border rounded-lg text-sm bg-gray-50"></textarea>
+          <textarea id="cup_qualityComm" rows="3" class="w-full p-2 border rounded-lg text-sm bg-gray-50 resize-none overflow-y-auto"></textarea>
         </div>
         
         <div class="pt-3 border-t">
           <label class="block text-xs font-semibold mb-1">Short Description</label>
-          <textarea id="cup_shortDesc" rows="2" class="w-full p-2 border rounded-lg text-sm bg-gray-50"></textarea>
+          <textarea id="cup_shortDesc" rows="2" class="w-full p-2 border rounded-lg text-sm bg-gray-50 resize-none overflow-y-auto"></textarea>
         </div>
         <div>
           <label class="block text-xs font-semibold mb-1">Price List Notes</label>
-          <input type="text" id="cup_priceNote" class="w-full p-2 border rounded-lg text-sm bg-gray-50">
+          <textarea id="cup_priceNote" rows="2" class="w-full p-2 border rounded-lg text-sm bg-gray-50 resize-none overflow-y-auto"></textarea>
         </div>
 
         <!-- 실시간 요약 (Unrefined & Negative) -->
@@ -332,12 +332,12 @@ let loadedDraftsCache = [];
           <div class="flex justify-between items-center mb-1">
             <label class="text-[10px] font-bold text-gray-500">Unrefined Notes (실시간 수식 연산)</label>
           </div>
-          <textarea id="preview_unrefined" readonly rows="4" class="w-full bg-transparent text-xs font-mono outline-none resize-none text-blue-800"></textarea>
+          <textarea id="preview_unrefined" readonly rows="4" class="w-full bg-transparent text-xs font-mono outline-none resize-none text-blue-800 overflow-y-auto"></textarea>
           
           <div class="flex justify-between items-center mb-1 mt-2">
             <label class="text-[10px] font-bold text-gray-500">Negative Notes</label>
           </div>
-          <textarea id="preview_negative" readonly rows="2" class="w-full bg-transparent text-xs font-mono outline-none resize-none text-red-600"></textarea>
+          <textarea id="preview_negative" readonly rows="2" class="w-full bg-transparent text-xs font-mono outline-none resize-none text-red-600 overflow-y-auto"></textarea>
         </div>
 
       </div>
@@ -703,8 +703,10 @@ function loadSelectedDraft(rowId) {
     updateRealtimePreview();
     return;
   }
-  currentDraftRowId = parseInt(rowId);
-  const draft = loadedDraftsCache.find(d => d.rowId === currentDraftRowId);
+  
+  // 💡 수정됨: parseInt를 제거하여 ID 문자열 유지
+  currentDraftRowId = rowId;
+  const draft = loadedDraftsCache.find(d => String(d.rowId) === String(currentDraftRowId));
   if(!draft) return;
 
   const f = draft.fields || {};
@@ -913,7 +915,7 @@ function renderMultiGrid() {
 
   for (let i = 1; i <= count; i++) {
     html += `
-    <div class="border rounded-xl p-3 bg-white shadow-sm space-y-2 text-xs" data-sample-idx="${i}">
+    <div class="border rounded-xl p-3 bg-white shadow-sm space-y-2 text-xs" data-sample-idx="${i}" data-row-id="">
       
       <!-- Sample Header -->
       <div class="flex items-center justify-between bg-gray-100 p-2 rounded-lg border">
@@ -983,7 +985,6 @@ function renderMultiGrid() {
                   <select id="m_ac_int_${i}" class="w-full p-0.5 border rounded bg-white font-medium text-[10px]">${intensityOpts}</select>
                 </div>
                 <div class="flex-1 h-full relative">
-                  <!-- 💡 줄바꿈(whitespace-normal, break-words)을 허용하고 상자 내부 스크롤(overflow-y-auto) 부여 -->
                   <button type="button" id="m_ac_type_btn_${i}" onclick="toggleMultiSelect('m_ac_type_${i}')" class="w-full h-full border rounded bg-white text-gray-700 font-medium text-left p-1.5 overflow-y-auto whitespace-normal break-words leading-tight text-[11px]">Acidity 종류 <span class="float-right text-[10px]">▼</span></button>
                   <div id="m_ac_type_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-48 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
                     ${acidityTypeBoxes(i)}
@@ -995,23 +996,23 @@ function renderMultiGrid() {
             <!-- Mouthfeel -->
             <div class="flex-1 border rounded-lg p-1.5 bg-gray-50/50 flex flex-col justify-between">
               <span class="font-bold text-gray-700 block">Mouthfeel</span>
-              <div class="grid grid-cols-2 gap-1">
+              <div class="grid grid-cols-2 gap-1 mb-1">
                 <input type="number" id="m_sc_mouth_${i}" value="6.00" step="0.25" onchange="calcMultiTotal(${i})" class="p-1 border rounded bg-white text-center font-bold">
                 <select id="m_mf_int_${i}" class="p-0.5 border rounded bg-white font-medium text-[10px]">${mfOpts}</select>
               </div>
-              <input type="text" id="m_mf_note_${i}" placeholder="Mouthfeel 노트" class="w-full p-1 border rounded bg-white">
-              <input type="text" id="m_mf_neg_${i}" placeholder="Mouthfeel Negative" class="w-full p-1 border rounded bg-white text-gray-500">
+              <textarea id="m_mf_note_${i}" rows="2" placeholder="Mouthfeel 노트" class="w-full p-1 border rounded bg-white resize-none overflow-y-auto mb-1"></textarea>
+              <textarea id="m_mf_neg_${i}" rows="2" placeholder="Mouthfeel Negative" class="w-full p-1 border rounded bg-white text-gray-500 resize-none overflow-y-auto"></textarea>
             </div>
 
             <!-- Aftertaste -->
             <div class="flex-1 border rounded-lg p-1.5 bg-gray-50/50 flex flex-col justify-between">
               <span class="font-bold text-gray-700 block">Aftertaste</span>
-              <div class="grid grid-cols-2 gap-1">
+              <div class="grid grid-cols-2 gap-1 mb-1">
                 <input type="number" id="m_sc_after_${i}" value="6.00" step="0.25" onchange="calcMultiTotal(${i})" class="p-1 border rounded bg-white text-center font-bold">
                 <select id="m_af_int_${i}" class="p-0.5 border rounded bg-white font-medium text-[10px]">${afOpts}</select>
               </div>
-              <input type="text" id="m_af_note_${i}" placeholder="Aftertaste 노트" class="w-full p-1 border rounded bg-white">
-              <input type="text" id="m_af_neg_${i}" placeholder="Aftertaste Negative" class="w-full p-1 border rounded bg-white text-gray-500">
+              <textarea id="m_af_note_${i}" rows="2" placeholder="Aftertaste 노트" class="w-full p-1 border rounded bg-white resize-none overflow-y-auto mb-1"></textarea>
+              <textarea id="m_af_neg_${i}" rows="2" placeholder="Aftertaste Negative" class="w-full p-1 border rounded bg-white text-gray-500 resize-none overflow-y-auto"></textarea>
             </div>
 
           </div>
@@ -1027,7 +1028,6 @@ function renderMultiGrid() {
                 <span class="w-10 text-[10px] font-semibold text-gray-600">Overall</span>
                 <select id="m_def_int_ov_${i}" class="w-16 p-0.5 border rounded bg-white text-[10px]">${intensityOpts}<option value="None" selected>None</option></select>
                 <div class="relative flex-1">
-                  <!-- 💡 줄바꿈 허용 클래스 부여 -->
                   <button type="button" id="m_def_typ_ov_btn_${i}" onclick="toggleMultiSelect('m_def_typ_ov_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left whitespace-normal break-words leading-tight text-[10px]">Defect 종류 <span class="float-right text-[10px]">▼</span></button>
                   <div id="m_def_typ_ov_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-48 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
                     ${defectTypeBoxes(i, 'ov')}
@@ -1078,11 +1078,11 @@ function renderMultiGrid() {
                   <select id="m_fl_int_${i}" class="w-full p-0.5 border rounded bg-white text-[10px]">${intensityOpts}</select>
                 </div>
                 <div class="flex-1 space-y-1 flex flex-col justify-between">
-                  <input type="text" id="m_fl_top_${i}" placeholder="Top notes" class="w-full p-1 border rounded bg-white flex-1">
-                  <input type="text" id="m_fl_extra_${i}" placeholder="Extra notes" class="w-full p-1 border rounded bg-white flex-1">
+                  <textarea id="m_fl_top_${i}" rows="2" placeholder="Top notes" class="w-full p-1 border rounded bg-white flex-1 resize-none overflow-y-auto"></textarea>
+                  <textarea id="m_fl_extra_${i}" rows="2" placeholder="Extra notes" class="w-full p-1 border rounded bg-white flex-1 resize-none overflow-y-auto"></textarea>
                 </div>
               </div>
-              <input type="text" id="m_fl_neg_${i}" placeholder="Flavour Negative" class="w-full p-1 border rounded bg-white text-gray-500">
+              <textarea id="m_fl_neg_${i}" rows="2" placeholder="Flavour Negative" class="w-full p-1 border rounded bg-white text-gray-500 mt-1 resize-none overflow-y-auto"></textarea>
             </div>
 
             <!-- Balance & Overall 점수 -->
@@ -1101,17 +1101,17 @@ function renderMultiGrid() {
 
         </div>
 
-        <!-- 3. [우측 독립 열] (Overall 노트 축소 & Roasting Point 확충) -->
+        <!-- 3. [우측 독립 열] -->
         <div class="w-56 flex-shrink-0 flex flex-col justify-between gap-2">
           
           <!-- Overall 노트 (상단) -->
           <div class="border rounded-lg p-2 bg-gray-50/50 space-y-1 flex-1 flex flex-col justify-between">
             <span class="font-bold text-gray-700 block border-b pb-0.5">Overall</span>
-            <textarea id="m_ov_note_${i}" rows="2" placeholder="Overall 노트" class="w-full p-1 border rounded bg-white resize-none flex-1 text-[11px]"></textarea>
-            <textarea id="m_ov_neg_${i}" rows="2" placeholder="Overall Negative" class="w-full p-1 border rounded bg-white text-gray-500 resize-none flex-1 text-[11px]"></textarea>
+            <textarea id="m_ov_note_${i}" rows="2" placeholder="Overall 노트" class="w-full p-1 border rounded bg-white resize-none overflow-y-auto flex-1 text-[11px]"></textarea>
+            <textarea id="m_ov_neg_${i}" rows="2" placeholder="Overall Negative" class="w-full p-1 border rounded bg-white text-gray-500 resize-none overflow-y-auto flex-1 text-[11px]"></textarea>
           </div>
 
-          <!-- Roasting Point (하단 - 폭 및 표시상자 확대) -->
+          <!-- Roasting Point (하단) -->
           <div class="border rounded-lg p-2 bg-gray-50/50 space-y-1.5">
             <div>
               <span class="font-bold text-gray-700 block text-[11px] mb-0.5">Possible Roasting point</span>
@@ -1142,9 +1142,9 @@ function renderMultiGrid() {
       <div class="border rounded-lg p-2 bg-gray-50/50 space-y-1">
         <span class="font-bold text-gray-700 block">Comment</span>
         <div class="flex gap-2">
-          <input type="text" id="m_shortDesc_${i}" placeholder="Short Description" class="w-[20%] p-1.5 border rounded bg-white text-xs">
-          <input type="text" id="m_priceNote_${i}" placeholder="Price List Notes" class="w-[20%] p-1.5 border rounded bg-white text-xs">
-          <textarea id="m_comm_${i}" rows="2" placeholder="Sensory Quality Comment" class="w-[60%] p-1.5 border rounded bg-white resize-none text-xs"></textarea>
+          <textarea id="m_shortDesc_${i}" rows="2" placeholder="Short Description" class="w-[20%] p-1.5 border rounded bg-white text-xs resize-none overflow-y-auto"></textarea>
+          <textarea id="m_priceNote_${i}" rows="2" placeholder="Price List Notes" class="w-[20%] p-1.5 border rounded bg-white text-xs resize-none overflow-y-auto"></textarea>
+          <textarea id="m_comm_${i}" rows="2" placeholder="Sensory Quality Comment" class="w-[60%] p-1.5 border rounded bg-white text-xs resize-none overflow-y-auto"></textarea>
         </div>
       </div>
 
@@ -1216,7 +1216,7 @@ function closeDraftModal() {
   document.getElementById('draftModal').classList.add('hidden');
 }
 
-function openIndividualDraftModal(i) {
+function function openIndividualDraftModal(i) {
   targetIndividualIdx = i;
   const modal = document.getElementById('draftModal');
   const title = document.getElementById('draftModalTitle');
@@ -1253,9 +1253,10 @@ function openIndividualDraftModal(i) {
       alert("불러올 항목을 선택해주세요.");
       return;
     }
-    const draft = loadedDraftsCache.find(d => d.rowId === parseInt(selected.value));
+    // 💡 수정됨: parseInt 제거
+    const draft = loadedDraftsCache.find(d => String(d.rowId) === String(selected.value));
     if (draft) {
-      restoreSampleDataFromDraft(targetIndividualIdx, draft.fields);
+      restoreSampleDataFromDraft(targetIndividualIdx, draft);
       calcMultiTotal(targetIndividualIdx);
       closeDraftModal();
       alert(`Sample #${targetIndividualIdx}에 선택한 정보가 반영되었습니다.`);
@@ -1310,9 +1311,10 @@ function openMultiDraftModal() {
 
     checkedEls.forEach((cb, idx) => {
       const sampleIdx = idx + 1;
-      const draft = loadedDraftsCache.find(d => d.rowId === parseInt(cb.value));
+      // 💡 수정됨: parseInt 제거
+      const draft = loadedDraftsCache.find(d => String(d.rowId) === String(cb.value));
       if (draft) {
-        restoreSampleDataFromDraft(sampleIdx, draft.fields);
+        restoreSampleDataFromDraft(sampleIdx, draft);
         calcMultiTotal(sampleIdx);
       }
     });
@@ -1326,6 +1328,11 @@ function openMultiDraftModal() {
 
 function buildSamplePayload(i, status) {
   const f = {};
+  
+  // 💡 DOM에서 Row ID 추출 (없으면 null)
+  const container = document.querySelector(`[data-sample-idx="${i}"]`);
+  const rowId = (container && container.dataset.rowId) ? container.dataset.rowId : null;
+
   f["Coffee Name"] = document.getElementById(`m_name_${i}`).value.trim();
   f["Lot Code"] = document.getElementById(`m_lotCode_${i}`).value.trim();
   f["Lot Number"] = document.getElementById(`m_lotNum_${i}`).value.trim();
@@ -1378,58 +1385,19 @@ function buildSamplePayload(i, status) {
   f["Price list Notes"] = document.getElementById(`m_priceNote_${i}`).value.trim();
   f["Sensory Quality Comment"] = document.getElementById(`m_comm_${i}`).value.trim();
 
-  return { formType: "cupping", status: status, fields: f };
+  return { formType: "cupping", status: status, rowId: rowId, fields: f };
 }
 
-function getCheckedValues(name) {
-  return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value).join(', ');
-}
-
-function saveMultiDrafts() {
-  const count = parseInt(document.getElementById('multiSampleCount').value) || 6;
-  let savedCount = 0;
-  for (let i = 1; i <= count; i++) {
-    const cName = document.getElementById(`m_name_${i}`).value.trim();
-    if (cName) {
-      const payload = buildSamplePayload(i, "Draft");
-      sendToServer(payload, null); 
-      savedCount++;
-    }
-  }
-  if (savedCount === 0) {
-    alert("저장할 샘플의 Coffee Name을 1개 이상 입력해주세요.");
-  } else {
-    alert(`💾 입력된 ${savedCount}개 샘플 데이터가 구글 시트에 일괄 저장되었습니다.`);
-  }
-}
-
-function submitMultiForm() {
-  const count = parseInt(document.getElementById('multiSampleCount').value) || 6;
-  let savedCount = 0;
-  
-  if(!confirm("🚀 일괄 검사를 완료하시겠습니까?\n완료 처리된 데이터는 앱에서 수정할 수 없습니다.")) {
-    return;
-  }
-
-  for (let i = 1; i <= count; i++) {
-    const cName = document.getElementById(`m_name_${i}`).value.trim();
-    if (cName) {
-      const payload = buildSamplePayload(i, "Completed");
-      sendToServer(payload, null); 
-      savedCount++;
-    }
-  }
-  
-  if (savedCount === 0) {
-    alert("완료할 샘플의 Coffee Name을 1개 이상 입력해주세요.");
-  } else {
-    alert(`🚀 ${savedCount}개 샘플 데이터가 성공적으로 검사 완료 처리되었습니다!`);
-    renderMultiGrid(); // 완료 후 폼 초기화
-  }
-}
-
-function restoreSampleDataFromDraft(i, f) {
+function restoreSampleDataFromDraft(i, draft) {
+  const f = draft.fields;
   if (!f) return;
+
+  // 💡 불러온 Row ID를 컨테이너 DOM에 캐싱하여 추후 덮어쓰기에 사용
+  const container = document.querySelector(`[data-sample-idx="${i}"]`);
+  if (container) {
+    container.dataset.rowId = draft.rowId || "";
+  }
+
   document.getElementById(`m_name_${i}`).value = f["Coffee Name"] || "";
   document.getElementById(`m_lotCode_${i}`).value = f["Lot Code"] || "";
   document.getElementById(`m_lotNum_${i}`).value = f["Lot Number"] || "";
@@ -1490,11 +1458,18 @@ function restoreSampleDataFromDraft(i, f) {
   updateMultiLabel(`m_roast_rec_${i}_pop`, `m_roast_rec_btn_${i}`, 'Roasting point 선택');
 }
 
-function setCheckboxes(name, commaStr) {
-  const arr = commaStr ? commaStr.split(',').map(s => s.trim()) : [];
-  document.querySelectorAll(`input[name="${name}"]`).forEach(cb => {
-    cb.checked = arr.includes(cb.value);
-  });
+function copySampleToNext(currentIdx) {
+  const nextIdx = currentIdx + 1;
+  const maxCount = parseInt(document.getElementById('multiSampleCount').value) || 6;
+  if (nextIdx > maxCount) {
+    alert("마지막 샘플입니다.");
+    return;
+  }
+  const payload = buildSamplePayload(currentIdx, "Draft").fields;
+  // 💡 신규 샘플로 복사하는 것이므로 rowId는 null로 처리하여 신규 생성되게 함
+  restoreSampleDataFromDraft(nextIdx, { rowId: null, fields: payload });
+  calcMultiTotal(nextIdx);
+  alert(`Sample #${currentIdx} 데이터가 Sample #${nextIdx}로 복사되었습니다.`);
 }
 </script>
 
