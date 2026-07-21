@@ -49,7 +49,7 @@ let loadedDraftsCache = [];
     </div>
   </div>
   
-<!-- 💡 [신규] 모드 전환 탭 -->
+  <!-- 💡 [신규] 모드 전환 탭 -->
   <div class="flex mb-4 bg-gray-200 rounded-lg p-1">
     <button type="button" id="tab-single" onclick="switchMode('single')" class="flex-1 py-2 text-sm font-bold rounded-md bg-white shadow text-purple-700 transition-all">단일 폼 (모바일)</button>
     <button type="button" id="tab-multi" onclick="switchMode('multi')" class="flex-1 py-2 text-sm font-bold rounded-md text-gray-500 hover:text-gray-700 transition-all">다중 일괄 폼 (태블릿)</button>
@@ -57,7 +57,7 @@ let loadedDraftsCache = [];
 
   <form id="multiCuppingForm" class="hidden space-y-4">
     
-<!-- 상단 컨트롤 바 (샘플 수 제어 및 일괄 버튼) -->
+    <!-- 상단 컨트롤 바 (샘플 수 제어 및 일괄 버튼) -->
     <div class="bg-white p-3 rounded-xl shadow-sm border flex flex-wrap items-center justify-between gap-2">
       <div class="flex items-center gap-3">
         <label class="text-xs font-bold text-gray-700">샘플 수</label>
@@ -311,7 +311,7 @@ let loadedDraftsCache = [];
             <button type="button" class="select-multi py-2 text-[10px] border rounded bg-gray-50">Medium</button>
             <button type="button" class="select-multi py-2 text-[10px] border rounded bg-gray-50">Medium-Dark</button>
             <button type="button" class="select-multi py-2 text-[10px] border rounded bg-gray-50">Dark</button>
-</div>
+          </div>
         </div>
         <div>
           <label class="block text-xs font-semibold mb-1 text-purple-700">Sensory Quality Comment</label>
@@ -417,7 +417,6 @@ function val(id) {
 // ==========================================
 function buildDefectBlocks() {
   const container = document.getElementById('defect-container');
-  // Overall과 Cup1~3 정의. 데이터 매핑을 위해 key 속성 추가
   const blocks = [
     {id: 'ov', title: 'Overall', kInt: 'Defect-Intensity', kTyp: 'Defect-Type'}, 
     {id: 'c1', title: 'Cup 1', kInt: 'Defect-Intensity (Cup1)', kTyp: 'Defect-Type (Cup1)'}, 
@@ -437,7 +436,6 @@ function buildDefectBlocks() {
             <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-white">Low</button>
             <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-white">Medium</button>
             <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-white">High</button>
-            <!-- 기본값 None은 active-btn 클래스를 미리 할당 -->
             <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-white active-btn">None</button>
           </div>
         </div>
@@ -506,7 +504,6 @@ function calcTotalScore() {
 // 실시간 연산기 (Unrefined & Negative)
 // ==========================================
 function updateRealtimePreview() {
-  // 1. Unrefined Notes
   let unrefined = [];
   
   let tNote = val('cup_fl_top'), eNote = val('cup_fl_extra');
@@ -539,10 +536,8 @@ function updateRealtimePreview() {
     if(ovNote) ovArr.push(ovNote);
     unrefined.push(`[Overall] ` + ovArr.join(", "));
   }
-  // 공백 결합이 아닌 줄바꿈(\n) 결합으로 변경
   document.getElementById('preview_unrefined').value = unrefined.join('\n');
 
-  // 2. Negative Notes
   let negative = [];
   if(val('cup_fl_neg')) negative.push(`[Flavour] ${val('cup_fl_neg')}`);
   if(val('cup_af_neg')) negative.push(`[Aftertaste] ${val('cup_af_neg')}`);
@@ -550,7 +545,7 @@ function updateRealtimePreview() {
   if(val('cup_ov_neg')) negative.push(`[Overall] ${val('cup_ov_neg')}`);
   
   let defInt = getValSingle('grp_def_int_ov'), defType = getValMulti('grp_def_typ_ov');
-if(defInt && defInt !== "None") {
+  if(defInt && defInt !== "None") {
     let dStr = `[Defect] ${defInt}${defType ? ', ' + defType : ''}`.trim();
     negative.push(dStr);
   }
@@ -568,7 +563,6 @@ function getCuppingPayload(status) {
     fields: {} 
   };
   
-  // G1
   payload.fields["Coffee Name"] = val('cup_name');
   payload.fields["Lot Code"] = val('cup_lotCode');
   payload.fields["Lot Number"] = val('cup_lotNum');
@@ -576,20 +570,17 @@ function getCuppingPayload(status) {
   payload.fields["Roasting Profile"] = val('cup_roastProfile');
   payload.fields["Roaster"] = getValSingle('group_roaster');
 
-  // G2 (Defects - Overall, Cup1, Cup2, Cup3)
   ['ov', 'c1', 'c2', 'c3'].forEach(id => {
     let block = document.getElementById('grp_def_int_' + id).parentElement.parentElement;
     payload.fields[block.dataset.kint] = getValSingle('grp_def_int_' + id);
     payload.fields[block.dataset.ktyp] = getValMulti('grp_def_typ_' + id);
   });
 
-  // G3 (Scores)
   SCORE_FIELDS.forEach(f => {
     payload.fields[f.key] = val(f.id);
   });
-  payload.fields["Score Detail"] = document.getElementById('cup_total_score').innerText; // 총점
+  payload.fields["Score Detail"] = document.getElementById('cup_total_score').innerText;
 
-  // G4 (Notes)
   payload.fields["Flavour-Intensity"] = getValSingle('grp_fl_int');
   payload.fields["Main Flavour-Top Notes"] = val('cup_fl_top');
   payload.fields["Flavour-Extra Notes"] = val('cup_fl_extra');
@@ -611,14 +602,12 @@ function getCuppingPayload(status) {
   payload.fields["Overall-Notes"] = val('cup_ov_note');
   payload.fields["Overall-Negative"] = val('cup_ov_neg');
 
-  // G5
   payload.fields["Possible Roasting point"] = getValMulti('grp_roast_pos');
   payload.fields["Roasting point Recommendation"] = getValMulti('grp_roast_rec');
   payload.fields["Sensory Quality Comment"] = val('cup_qualityComm');
   payload.fields["Short description"] = val('cup_shortDesc');
   payload.fields["Price list Notes"] = val('cup_priceNote');
   
-  // Realtime Texts (에어테이블에 계산값이 그대로 전송되도록)
   payload.fields["Unrefined Notes"] = val('preview_unrefined');
   payload.fields["Negative Notes"] = val('preview_negative');
 
@@ -628,8 +617,6 @@ function getCuppingPayload(status) {
 // ==========================================
 // 구글 시트 연동 임시저장 및 서버 전송
 // ==========================================
-
-// 임시저장 (Status: Draft)
 function saveDraft() {
   const data = getCuppingPayload("Draft");
   if(!data.fields["Coffee Name"]) {
@@ -639,7 +626,6 @@ function saveDraft() {
   sendToServer(data, "💾 시트에 임시저장되었습니다.");
 }
 
-// 검사 완료 (Status: Completed)
 function submitForm() {
   const data = getCuppingPayload("Completed");
   if(!data.fields["Coffee Name"]) {
@@ -652,7 +638,6 @@ function submitForm() {
   sendToServer(data, "🚀 검사가 완료 처리되었습니다!");
 }
 
-// 공통 전송 함수
 function sendToServer(payload, successMsg) {
   const btn = event ? event.target : null;
   const originText = btn ? btn.innerText : "";
@@ -667,7 +652,6 @@ function sendToServer(payload, successMsg) {
     alert(successMsg);
     if(btn) { btn.innerText = originText; btn.disabled = false; }
     
-    // 검사 완료된 경우 폼 초기화
     if(payload.status === "Completed") {
       currentDraftRowId = null;
       document.getElementById('cuppingForm').reset();
@@ -675,8 +659,6 @@ function sendToServer(payload, successMsg) {
       buildCuppingScores();
       updateRealtimePreview();
     }
-    
-    // 1.5초 후 시트 반영 상태 반영하여 임시저장 목록 갱신
     setTimeout(loadDraftList, 1500);
   }).catch(e => {
     alert("오류가 발생했습니다. 네트워크 상태를 확인하세요.");
@@ -684,7 +666,6 @@ function sendToServer(payload, successMsg) {
   });
 }
 
-// 구글 시트에서 Status가 Draft인 데이터 목록 불러오기
 async function loadDraftList() {
   const select = document.getElementById('draftSelect');
   if(!select) return;
@@ -700,7 +681,6 @@ async function loadDraftList() {
     loadedDraftsCache.forEach(draft => {
       const opt = document.createElement('option');
       opt.value = draft.rowId;
-      
       const cName = draft.fields["Coffee Name"] || "이름 없음";
       const cDate = draft.fields["Cupping Date"] || "";
       const cLot = draft.fields["Lot Code"] ? ` (${draft.fields["Lot Code"]})` : "";
@@ -708,17 +688,12 @@ async function loadDraftList() {
       opt.textContent = `📂 ${cName} - ${cDate}${cLot}`;
       select.appendChild(opt);
     });
-
-    if(currentDraftRowId) {
-      select.value = currentDraftRowId;
-    }
+    if(currentDraftRowId) select.value = currentDraftRowId;
   } catch(e) {
     select.innerHTML = '<option value="">-- 목록 불러오기 실패 --</option>';
-    console.error("Draft 목록 로딩 실패:", e);
   }
 }
 
-// 선택한 임시저장 데이터를 폼에 복원
 function loadSelectedDraft(rowId) {
   if(!rowId) {
     currentDraftRowId = null;
@@ -728,13 +703,11 @@ function loadSelectedDraft(rowId) {
     updateRealtimePreview();
     return;
   }
-
   currentDraftRowId = parseInt(rowId);
   const draft = loadedDraftsCache.find(d => d.rowId === currentDraftRowId);
   if(!draft) return;
 
   const f = draft.fields || {};
-
   document.getElementById('cup_name').value = f["Coffee Name"] || "";
   document.getElementById('cup_lotCode').value = f["Lot Code"] || "";
   document.getElementById('cup_lotNum').value = f["Lot Number"] || "";
@@ -817,6 +790,7 @@ function setValMulti(groupId, commaStr) {
     else b.classList.remove('active-btn');
   });
 }
+
 // ==========================================
 // 💡 모드 전환 제어 (단일 <-> 다중)
 // ==========================================
@@ -836,7 +810,6 @@ function switchMode(mode) {
     formSingle.classList.remove('hidden');
     formMulti.classList.add('hidden');
     
-    // 단일 모드: 임시저장 불러오기 활성화
     if (draftSelect) {
       draftSelect.disabled = false;
       draftSelect.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -849,76 +822,21 @@ function switchMode(mode) {
     formMulti.classList.remove('hidden');
     formSingle.classList.add('hidden');
     
-    // 다중 모드: 단일 임시저장 불러오기 비활성화
     if (draftSelect) {
       draftSelect.disabled = true;
       draftSelect.value = "";
       draftSelect.classList.add('opacity-50', 'cursor-not-allowed');
     }
+    
+    const multiContainer = document.getElementById('multiGridContainer');
+    if (!multiContainer.children.length) {
+      renderMultiGrid();
+    }
   }
 }
-  // ==========================================
-// 💡 다중 입력 2단 그리드 생성 로직 (태블릿 양식 반영)
-// ==========================================
-// ==========================================
-// 💡 이미지 양식(image_d61f64) 정밀 반영 2단 그리드 렌더러
-// ==========================================
-
-// 멀티셀렉트 팝오버 토글 함수
-function toggleMultiSelect(id) {
-  const pop = document.getElementById(id + '_pop');
-  if(!pop) return;
-  // 다른 팝오버 닫기
-  document.querySelectorAll('[id$="_pop"]').forEach(el => {
-    if(el !== pop) el.classList.add('hidden');
-  });
-  pop.classList.toggle('hidden');
-}
-
-// Acidity 종류 체크박스 생성
-function acidityTypeBoxes(i) {
-  const types = ["Citric", "Malic", "Tartaric", "Lactic", "Acetic", "Phosphoric", "Butyric", "Succinic", "Other"];
-  return types.map(t => `
-    <label class="flex items-center gap-1.5 text-xs text-gray-800 cursor-pointer hover:bg-red-50 p-0.5 rounded">
-      <input type="checkbox" name="m_ac_type_${i}" value="${t}" class="rounded text-red-600 focus:ring-0"> ${t}
-    </label>
-  `).join('');
-}
-
-// Defect 종류 체크박스 생성
-function defectTypeBoxes(i, cupKey) {
-  const types = ["Quaker", "Papery", "Woody", "Phenol", "Over-Fermented", "Leathery", "Stinker", "Others"];
-  return types.map(t => `
-    <label class="flex items-center gap-1.5 text-xs text-gray-800 cursor-pointer hover:bg-red-50 p-0.5 rounded">
-      <input type="checkbox" name="m_def_typ_${cupKey}_${i}" value="${t}" class="rounded text-red-600 focus:ring-0"> ${t}
-    </label>
-  `).join('');
-}
-
-// Roasting Point 체크박스 생성
-function roastPointBoxes(i, typeKey) {
-  const points = ["Light", "Medium-Light", "Medium", "Medium-Dark", "Dark"];
-  return points.map(p => `
-    <label class="flex items-center gap-1.5 text-xs text-gray-800 cursor-pointer hover:bg-red-50 p-0.5 rounded">
-      <input type="checkbox" name="m_roast_${typeKey}_${i}" value="${p}" class="rounded text-red-600 focus:ring-0"> ${p}
-    </label>
-  `).join('');
-}
-
-// 다중 총점 자동 계산 함수
-function calcMultiTotal(i) {
-  const fields = ['clean', 'sweet', 'acid', 'mouth', 'flav', 'after', 'bal', 'over'];
-  let sum = 36;
-  fields.forEach(f => {
-    const el = document.getElementById(`m_sc_${f}_${i}`);
-    if(el) sum += parseFloat(el.value) || 0;
-  });
-  const totalEl = document.getElementById(`m_total_${i}`);
-  if(totalEl) totalEl.innerText = sum.toFixed(2);
-}
 
 // ==========================================
-// 💡 image_d7047b 정밀 레이아웃 & 동적 멀티셀렉트 렌더러
+// 💡 다중 입력 2단 그리드 생성 및 렌더러
 // ==========================================
 
 function toggleMultiSelect(id) {
@@ -930,99 +848,7 @@ function toggleMultiSelect(id) {
   pop.classList.toggle('hidden');
 }
 
-function acidityTypeBoxes(i) {
-  const types = ["Citric", "Malic", "Tartaric", "Lactic", "Acetic", "Phosphoric", "Butyric", "Succinic", "Other"];
-  return types.map(t => `
-    <label class="flex items-center gap-1.5 text-xs text-gray-800 cursor-pointer hover:bg-gray-100 p-1 rounded">
-      <input type="checkbox" name="m_ac_type_${i}" value="${t}" onchange="updateMultiLabel('m_ac_type_${i}_pop', 'm_ac_type_btn_${i}', 'Acidity 종류')" class="rounded text-purple-600 focus:ring-0"> ${t}
-    </label>
-  `).join('');
-}
-
-function defectTypeBoxes(i, cupKey) {
-  const types = ["Quaker", "Papery", "Woody", "Phenol", "Over-Fermented", "Leathery", "Stinker", "Others"];
-  return types.map(t => `
-    <label class="flex items-center gap-1.5 text-xs text-gray-800 cursor-pointer hover:bg-gray-100 p-1 rounded">
-      <input type="checkbox" name="m_def_typ_${cupKey}_${i}" value="${t}" onchange="updateMultiLabel('m_def_typ_${cupKey}_${i}_pop', 'm_def_typ_${cupKey}_btn_${i}', 'Defect 종류')" class="rounded text-purple-600 focus:ring-0"> ${t}
-    </label>
-  `).join('');
-}
-
-function roastPointBoxes(i, typeKey) {
-  const points = ["Light", "Medium-Light", "Medium", "Medium-Dark", "Dark"];
-  return points.map(p => `
-    <label class="flex items-center gap-1.5 text-xs text-gray-800 cursor-pointer hover:bg-gray-100 p-1 rounded">
-      <input type="checkbox" name="m_roast_${typeKey}_${i}" value="${p}" onchange="updateMultiLabel('m_roast_${typeKey}_${i}_pop', 'm_roast_${typeKey}_btn_${i}', 'Roasting point 선택')" class="rounded text-purple-600 focus:ring-0"> ${p}
-    </label>
-  `).join('');
-}
-
-function calcMultiTotal(i) {
-  const fields = ['clean', 'sweet', 'acid', 'mouth', 'flav', 'after', 'bal', 'over'];
-  let sum = 36;
-  fields.forEach(f => {
-    const el = document.getElementById(`m_sc_${f}_${i}`);
-    if(el) sum += parseFloat(el.value) || 0;
-  });
-  const totalEl = document.getElementById(`m_total_${i}`);
-  if(totalEl) totalEl.innerText = sum.toFixed(2);
-}
-
-// ==========================================
-// 💡 image_e268cd 도면 완벽 일치 정밀 Flex/Grid 렌더러
-// ==========================================
-
-function toggleMultiSelect(id) {
-  const pop = document.getElementById(id + '_pop');
-  if(!pop) return;
-  document.querySelectorAll('[id$="_pop"]').forEach(el => {
-    if(el !== pop) el.classList.add('hidden');
-  });
-  pop.classList.toggle('hidden');
-}
-
-function acidityTypeBoxes(i) {
-  const types = ["Citric", "Malic", "Tartaric", "Lactic", "Acetic", "Phosphoric", "Butyric", "Succinic", "Other"];
-  return types.map(t => `
-    <label class="flex items-center gap-1.5 text-xs text-gray-800 cursor-pointer hover:bg-gray-100 p-1 rounded">
-      <input type="checkbox" name="m_ac_type_${i}" value="${t}" onchange="updateMultiLabel('m_ac_type_${i}_pop', 'm_ac_type_btn_${i}', 'Acidity 종류')" class="rounded text-purple-600 focus:ring-0"> ${t}
-    </label>
-  `).join('');
-}
-
-function defectTypeBoxes(i, cupKey) {
-  const types = ["Quaker", "Papery", "Woody", "Phenol", "Over-Fermented", "Leathery", "Stinker", "Others"];
-  return types.map(t => `
-    <label class="flex items-center gap-1.5 text-xs text-gray-800 cursor-pointer hover:bg-gray-100 p-1 rounded">
-      <input type="checkbox" name="m_def_typ_${cupKey}_${i}" value="${t}" onchange="updateMultiLabel('m_def_typ_${cupKey}_${i}_pop', 'm_def_typ_${cupKey}_btn_${i}', 'Defect 종류')" class="rounded text-purple-600 focus:ring-0"> ${t}
-    </label>
-  `).join('');
-}
-
-function roastPointBoxes(i, typeKey) {
-  const points = ["Light", "Medium-Light", "Medium", "Medium-Dark", "Dark"];
-  return points.map(p => `
-    <label class="flex items-center gap-1.5 text-xs text-gray-800 cursor-pointer hover:bg-gray-100 p-1 rounded">
-      <input type="checkbox" name="m_roast_${typeKey}_${i}" value="${p}" onchange="updateMultiLabel('m_roast_${typeKey}_${i}_pop', 'm_roast_${typeKey}_btn_${i}', 'Roasting point 선택')" class="rounded text-purple-600 focus:ring-0"> ${p}
-    </label>
-  `).join('');
-}
-
-function calcMultiTotal(i) {
-  const fields = ['clean', 'sweet', 'acid', 'mouth', 'flav', 'after', 'bal', 'over'];
-  let sum = 36;
-  fields.forEach(f => {
-    const el = document.getElementById(`m_sc_${f}_${i}`);
-    if(el) sum += parseFloat(el.value) || 0;
-  });
-  const totalEl = document.getElementById(`m_total_${i}`);
-  if(totalEl) totalEl.innerText = sum.toFixed(2);
-}
-
-// ==========================================
-// 💡 UI 비율 재조정 정밀 Flex/Grid 렌더러
-// ==========================================
-
+// 💡 텍스트 줄바꿈 허용 & '외 N개' 삭제 처리된 업데이트 라벨 함수
 function updateMultiLabel(popId, btnId, defaultText) {
   const pop = document.getElementById(popId);
   const btn = document.getElementById(btnId);
@@ -1031,10 +857,48 @@ function updateMultiLabel(popId, btnId, defaultText) {
   const checked = Array.from(pop.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
   
   if (checked.length === 0) {
-    btn.innerText = `${defaultText} ▼`;
+    btn.innerHTML = `${defaultText} <span class="float-right text-[10px]">▼</span>`;
   } else {
-    btn.innerText = `${checked.join(', ')} ▼`;
+    btn.innerHTML = `${checked.join(', ')} <span class="float-right text-[10px]">▼</span>`;
   }
+}
+
+function acidityTypeBoxes(i) {
+  const types = ["Citric", "Malic", "Tartaric", "Lactic", "Acetic", "Phosphoric", "Butyric", "Succinic", "Other"];
+  return types.map(t => `
+    <label class="flex items-center gap-1.5 text-xs text-gray-800 cursor-pointer hover:bg-gray-100 p-1 rounded">
+      <input type="checkbox" name="m_ac_type_${i}" value="${t}" onchange="updateMultiLabel('m_ac_type_${i}_pop', 'm_ac_type_btn_${i}', 'Acidity 종류')" class="rounded text-purple-600 focus:ring-0"> ${t}
+    </label>
+  `).join('');
+}
+
+function defectTypeBoxes(i, cupKey) {
+  const types = ["Quaker", "Papery", "Woody", "Phenol", "Over-Fermented", "Leathery", "Stinker", "Others"];
+  return types.map(t => `
+    <label class="flex items-center gap-1.5 text-xs text-gray-800 cursor-pointer hover:bg-gray-100 p-1 rounded">
+      <input type="checkbox" name="m_def_typ_${cupKey}_${i}" value="${t}" onchange="updateMultiLabel('m_def_typ_${cupKey}_${i}_pop', 'm_def_typ_${cupKey}_btn_${i}', 'Defect 종류')" class="rounded text-purple-600 focus:ring-0"> ${t}
+    </label>
+  `).join('');
+}
+
+function roastPointBoxes(i, typeKey) {
+  const points = ["Light", "Medium-Light", "Medium", "Medium-Dark", "Dark"];
+  return points.map(p => `
+    <label class="flex items-center gap-1.5 text-xs text-gray-800 cursor-pointer hover:bg-gray-100 p-1 rounded">
+      <input type="checkbox" name="m_roast_${typeKey}_${i}" value="${p}" onchange="updateMultiLabel('m_roast_${typeKey}_${i}_pop', 'm_roast_${typeKey}_btn_${i}', 'Roasting point 선택')" class="rounded text-purple-600 focus:ring-0"> ${p}
+    </label>
+  `).join('');
+}
+
+function calcMultiTotal(i) {
+  const fields = ['clean', 'sweet', 'acid', 'mouth', 'flav', 'after', 'bal', 'over'];
+  let sum = 36;
+  fields.forEach(f => {
+    const el = document.getElementById(`m_sc_${f}_${i}`);
+    if(el) sum += parseFloat(el.value) || 0;
+  });
+  const totalEl = document.getElementById(`m_total_${i}`);
+  if(totalEl) totalEl.innerText = sum.toFixed(2);
 }
 
 function renderMultiGrid() {
@@ -1110,7 +974,7 @@ function renderMultiGrid() {
               </div>
             </div>
 
-            <!-- Acidity (표시 상자 및 폭 대폭 확장) -->
+            <!-- Acidity -->
             <div class="w-56 flex-shrink-0 border rounded-lg p-1.5 bg-gray-50/50 flex flex-col">
               <span class="font-bold text-gray-700 block mb-1">Acidity</span>
               <div class="flex gap-1.5 flex-1">
@@ -1119,7 +983,8 @@ function renderMultiGrid() {
                   <select id="m_ac_int_${i}" class="w-full p-0.5 border rounded bg-white font-medium text-[10px]">${intensityOpts}</select>
                 </div>
                 <div class="flex-1 h-full relative">
-                  <button type="button" id="m_ac_type_btn_${i}" onclick="toggleMultiSelect('m_ac_type_${i}')" class="w-full h-full border rounded bg-white text-gray-700 font-medium text-left p-1.5 overflow-y-auto leading-tight text-[11px]">Acidity 종류 ▼</button>
+                  <!-- 💡 줄바꿈(whitespace-normal, break-words)을 허용하고 상자 내부 스크롤(overflow-y-auto) 부여 -->
+                  <button type="button" id="m_ac_type_btn_${i}" onclick="toggleMultiSelect('m_ac_type_${i}')" class="w-full h-full border rounded bg-white text-gray-700 font-medium text-left p-1.5 overflow-y-auto whitespace-normal break-words leading-tight text-[11px]">Acidity 종류 <span class="float-right text-[10px]">▼</span></button>
                   <div id="m_ac_type_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-48 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
                     ${acidityTypeBoxes(i)}
                   </div>
@@ -1154,7 +1019,7 @@ function renderMultiGrid() {
           <!-- 중앙 하단 행 -->
           <div class="flex gap-2 h-[145px]">
             
-            <!-- Defect (가로 폭 및 표시 버튼 확장) -->
+            <!-- Defect -->
             <div class="w-72 flex-shrink-0 border rounded-lg p-1.5 bg-gray-50/50 flex flex-col justify-between">
               <span class="font-bold text-gray-700 block">Defect</span>
               
@@ -1162,7 +1027,8 @@ function renderMultiGrid() {
                 <span class="w-10 text-[10px] font-semibold text-gray-600">Overall</span>
                 <select id="m_def_int_ov_${i}" class="w-16 p-0.5 border rounded bg-white text-[10px]">${intensityOpts}<option value="None" selected>None</option></select>
                 <div class="relative flex-1">
-                  <button type="button" id="m_def_typ_ov_btn_${i}" onclick="toggleMultiSelect('m_def_typ_ov_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate text-[10px]">Defect 종류 ▼</button>
+                  <!-- 💡 줄바꿈 허용 클래스 부여 -->
+                  <button type="button" id="m_def_typ_ov_btn_${i}" onclick="toggleMultiSelect('m_def_typ_ov_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left whitespace-normal break-words leading-tight text-[10px]">Defect 종류 <span class="float-right text-[10px]">▼</span></button>
                   <div id="m_def_typ_ov_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-48 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
                     ${defectTypeBoxes(i, 'ov')}
                   </div>
@@ -1173,7 +1039,7 @@ function renderMultiGrid() {
                 <span class="w-10 text-[10px] font-semibold text-gray-600">Cup1</span>
                 <select id="m_def_int_c1_${i}" class="w-16 p-0.5 border rounded bg-white text-[10px]">${intensityOpts}<option value="None" selected>None</option></select>
                 <div class="relative flex-1">
-                  <button type="button" id="m_def_typ_c1_btn_${i}" onclick="toggleMultiSelect('m_def_typ_c1_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate text-[10px]">Defect 종류 ▼</button>
+                  <button type="button" id="m_def_typ_c1_btn_${i}" onclick="toggleMultiSelect('m_def_typ_c1_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left whitespace-normal break-words leading-tight text-[10px]">Defect 종류 <span class="float-right text-[10px]">▼</span></button>
                   <div id="m_def_typ_c1_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-48 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
                     ${defectTypeBoxes(i, 'c1')}
                   </div>
@@ -1184,7 +1050,7 @@ function renderMultiGrid() {
                 <span class="w-10 text-[10px] font-semibold text-gray-600">Cup2</span>
                 <select id="m_def_int_c2_${i}" class="w-16 p-0.5 border rounded bg-white text-[10px]">${intensityOpts}<option value="None" selected>None</option></select>
                 <div class="relative flex-1">
-                  <button type="button" id="m_def_typ_c2_btn_${i}" onclick="toggleMultiSelect('m_def_typ_c2_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate text-[10px]">Defect 종류 ▼</button>
+                  <button type="button" id="m_def_typ_c2_btn_${i}" onclick="toggleMultiSelect('m_def_typ_c2_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left whitespace-normal break-words leading-tight text-[10px]">Defect 종류 <span class="float-right text-[10px]">▼</span></button>
                   <div id="m_def_typ_c2_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-48 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
                     ${defectTypeBoxes(i, 'c2')}
                   </div>
@@ -1195,7 +1061,7 @@ function renderMultiGrid() {
                 <span class="w-10 text-[10px] font-semibold text-gray-600">Cup3</span>
                 <select id="m_def_int_c3_${i}" class="w-16 p-0.5 border rounded bg-white text-[10px]">${intensityOpts}<option value="None" selected>None</option></select>
                 <div class="relative flex-1">
-                  <button type="button" id="m_def_typ_c3_btn_${i}" onclick="toggleMultiSelect('m_def_typ_c3_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate text-[10px]">Defect 종류 ▼</button>
+                  <button type="button" id="m_def_typ_c3_btn_${i}" onclick="toggleMultiSelect('m_def_typ_c3_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left whitespace-normal break-words leading-tight text-[10px]">Defect 종류 <span class="float-right text-[10px]">▼</span></button>
                   <div id="m_def_typ_c3_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-48 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
                     ${defectTypeBoxes(i, 'c3')}
                   </div>
@@ -1250,7 +1116,7 @@ function renderMultiGrid() {
             <div>
               <span class="font-bold text-gray-700 block text-[11px] mb-0.5">Possible Roasting point</span>
               <div class="relative">
-                <button type="button" id="m_roast_pos_btn_${i}" onclick="toggleMultiSelect('m_roast_pos_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate text-[10px]">Roasting point 선택 ▼</button>
+                <button type="button" id="m_roast_pos_btn_${i}" onclick="toggleMultiSelect('m_roast_pos_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left whitespace-normal break-words leading-tight text-[10px]">Roasting point 선택 <span class="float-right text-[10px]">▼</span></button>
                 <div id="m_roast_pos_${i}_pop" class="hidden absolute right-0 top-full mt-1 w-48 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
                   ${roastPointBoxes(i, 'pos')}
                 </div>
@@ -1260,7 +1126,7 @@ function renderMultiGrid() {
             <div>
               <span class="font-bold text-gray-700 block text-[11px] mb-0.5">Roasting point Recommendation</span>
               <div class="relative">
-                <button type="button" id="m_roast_rec_btn_${i}" onclick="toggleMultiSelect('m_roast_rec_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate text-[10px]">Roasting point 선택 ▼</button>
+                <button type="button" id="m_roast_rec_btn_${i}" onclick="toggleMultiSelect('m_roast_rec_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left whitespace-normal break-words leading-tight text-[10px]">Roasting point 선택 <span class="float-right text-[10px]">▼</span></button>
                 <div id="m_roast_rec_${i}_pop" class="hidden absolute right-0 top-full mt-1 w-48 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
                   ${roastPointBoxes(i, 'rec')}
                 </div>
@@ -1272,13 +1138,13 @@ function renderMultiGrid() {
 
       </div>
 
-      <!-- 4. [하단 전체 열] Comment (20% : 20% : 60% 비율 재할당) -->
+      <!-- 4. [하단 전체 열] Comment -->
       <div class="border rounded-lg p-2 bg-gray-50/50 space-y-1">
         <span class="font-bold text-gray-700 block">Comment</span>
         <div class="flex gap-2">
-          <input type="text" id="m_shortDesc_${i}" placeholder="Short Description" class="w-[20%] p-1.5 border rounded bg-white">
-          <input type="text" id="m_priceNote_${i}" placeholder="Price List Notes" class="w-[20%] p-1.5 border rounded bg-white">
-          <textarea id="m_comm_${i}" rows="2" placeholder="Sensory Quality Comment" class="w-[60%] p-1.5 border rounded bg-white resize-none"></textarea>
+          <input type="text" id="m_shortDesc_${i}" placeholder="Short Description" class="w-[20%] p-1.5 border rounded bg-white text-xs">
+          <input type="text" id="m_priceNote_${i}" placeholder="Price List Notes" class="w-[20%] p-1.5 border rounded bg-white text-xs">
+          <textarea id="m_comm_${i}" rows="2" placeholder="Sensory Quality Comment" class="w-[60%] p-1.5 border rounded bg-white resize-none text-xs"></textarea>
         </div>
       </div>
 
@@ -1295,60 +1161,19 @@ function renderMultiGrid() {
   }
 }
 
-// 1단계 switchMode 오버라이드 연동
-const origSwitchMode = window.switchMode;
-window.switchMode = function(mode) {
-  origSwitchMode(mode);
-  if (mode === 'multi') {
-    const container = document.getElementById('multiGridContainer');
-    if (!container.children.length) {
-      renderMultiGrid();
-    }
-  }
-};
-  // ==========================================
-// 💡 멀티셀렉트 선택 결과 동적 라벨 업데이트
-// ==========================================
-function updateMultiLabel(popId, btnId, defaultText) {
-  const pop = document.getElementById(popId);
-  const btn = document.getElementById(btnId);
-  if (!pop || !btn) return;
-
-  const checked = Array.from(pop.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
-  
-  if (checked.length === 0) {
-    btn.innerText = `${defaultText} ▼`;
-  } else if (checked.length <= 2) {
-    btn.innerText = `${checked.join(', ')} ▼`;
-  } else {
-    btn.innerText = `${checked[0]}, ${checked[1]} 외 ${checked.length - 2}개 ▼`;
-  }
-}
-
 // ==========================================
 // 💡 샘플별 개별 저장 / 불러오기 / 복사 로직
 // ==========================================
-
-// 샘플 N 개별 로컬 저장
 function saveIndividualDraft(i) {
-  const data = captureSampleData(i);
-  localStorage.setItem(`cupping_sample_draft_${i}`, JSON.stringify(data));
-  alert(`☕ Sample #${i} 데이터가 로컬에 저장되었습니다.`);
-}
-
-// 샘플 N 개별 로컬 불러오기
-function loadIndividualDraft(i) {
-  const saved = localStorage.getItem(`cupping_sample_draft_${i}`);
-  if (!saved) {
-    alert(`☕ Sample #${i}의 저장된 개별 임시저장 데이터가 없습니다.`);
+  const cName = document.getElementById(`m_name_${i}`).value.trim();
+  if (!cName) {
+    alert(`Sample #${i}의 Coffee Name을 입력해주세요.`);
     return;
   }
-  restoreSampleData(i, JSON.parse(saved));
-  calcMultiTotal(i);
-  alert(`☕ Sample #${i} 데이터를 불러왔습니다.`);
+  const payload = buildSamplePayload(i, "Draft");
+  sendToServer(payload, `💾 Sample #${i} 데이터가 구글 시트에 임시저장되었습니다.`);
 }
 
-// 이전 샘플 -> 다음 샘플 복사
 function copySampleToNext(currentIdx) {
   const nextIdx = currentIdx + 1;
   const maxCount = parseInt(document.getElementById('multiSampleCount').value) || 6;
@@ -1356,13 +1181,12 @@ function copySampleToNext(currentIdx) {
     alert("마지막 샘플입니다.");
     return;
   }
-  const data = captureSampleData(currentIdx);
-  restoreSampleData(nextIdx, data);
+  const payload = buildSamplePayload(currentIdx, "Draft").fields;
+  restoreSampleDataFromDraft(nextIdx, payload);
   calcMultiTotal(nextIdx);
   alert(`Sample #${currentIdx} 데이터가 Sample #${nextIdx}로 복사되었습니다.`);
 }
 
-// 1번 샘플 기본정보(커피정보) 전체 적용
 function copySample1Info() {
   const count = parseInt(document.getElementById('multiSampleCount').value) || 6;
   const s1Name = document.getElementById('m_name_1').value;
@@ -1383,58 +1207,15 @@ function copySample1Info() {
   alert("1번 샘플의 기본 정보가 전체 샘플에 적용되었습니다.");
 }
 
-// 단일 샘플 데이터 캡처 유틸
-function captureSampleData(i) {
-  const obj = {};
-  const inputs = document.querySelectorAll(`[data-sample-idx="${i}"] input, [data-sample-idx="${i}"] select, [data-sample-idx="${i}"] textarea`);
-  inputs.forEach(el => {
-    if (el.type === 'checkbox') {
-      if (!obj[el.name]) obj[el.name] = [];
-      if (el.checked) obj[el.name].push(el.value);
-    } else {
-      obj[el.id] = el.value;
-    }
-  });
-  return obj;
-}
-
-// 단일 샘플 데이터 복원 유틸
-function restoreSampleData(i, data) {
-  Object.keys(data).forEach(key => {
-    const val = data[key];
-    if (Array.isArray(val)) {
-      // 체크박스 그룹
-      const cbs = document.querySelectorAll(`input[name="${key}"]`);
-      cbs.forEach(cb => {
-        cb.checked = val.includes(cb.value);
-      });
-    } else {
-      const el = document.getElementById(key);
-      if (el) el.value = val;
-    }
-  });
-
-  // 멀티셀렉트 버튼 라벨 동기화
-  updateMultiLabel(`m_ac_type_${i}_pop`, `m_ac_type_btn_${i}`, 'Acidity 종류');
-  updateMultiLabel(`m_def_typ_ov_${i}_pop`, `m_def_typ_ov_btn_${i}`, 'Defect 종류');
-  updateMultiLabel(`m_def_typ_c1_${i}_pop`, `m_def_typ_c1_btn_${i}`, 'Defect 종류');
-  updateMultiLabel(`m_def_typ_c2_${i}_pop`, `m_def_typ_c2_btn_${i}`, 'Defect 종류');
-  updateMultiLabel(`m_def_typ_c3_${i}_pop`, `m_def_typ_c3_btn_${i}`, 'Defect 종류');
-  updateMultiLabel(`m_roast_pos_${i}_pop`, `m_roast_pos_btn_${i}`, 'Roasting point 선택');
-  updateMultiLabel(`m_roast_rec_${i}_pop`, `m_roast_rec_btn_${i}`, 'Roasting point 선택');
-}
-  // ==========================================
-// 💡 구글 시트 연동 개별/다중 저장 및 불러오기 로직
 // ==========================================
-
+// 💡 구글 시트 연동 다중 저장 및 불러오기 모달
+// ==========================================
 let targetIndividualIdx = null;
 
-// 모달 닫기
 function closeDraftModal() {
   document.getElementById('draftModal').classList.add('hidden');
 }
 
-// 1. 개별 불러오기 모달 열기
 function openIndividualDraftModal(i) {
   targetIndividualIdx = i;
   const modal = document.getElementById('draftModal');
@@ -1484,7 +1265,6 @@ function openIndividualDraftModal(i) {
   modal.classList.remove('hidden');
 }
 
-// 2. 다중 불러오기 모달 열기 (체크박스 순차 매핑)
 function openMultiDraftModal() {
   const modal = document.getElementById('draftModal');
   const title = document.getElementById('draftModalTitle');
@@ -1544,7 +1324,6 @@ function openMultiDraftModal() {
   modal.classList.remove('hidden');
 }
 
-// 개별/다중 저장 시 활용할 페이로드 변환 유틸
 function buildSamplePayload(i, status) {
   const f = {};
   f["Coffee Name"] = document.getElementById(`m_name_${i}`).value.trim();
@@ -1554,7 +1333,6 @@ function buildSamplePayload(i, status) {
   f["Roasting Profile"] = document.getElementById(`m_roast_${i}`).value.trim();
   f["Roaster"] = document.getElementById(`m_roaster_${i}`).value;
 
-  // Scores
   f["Clean Cup"] = document.getElementById(`m_sc_clean_${i}`).value;
   f["Sweetness"] = document.getElementById(`m_sc_sweet_${i}`).value;
   f["Acidity"] = document.getElementById(`m_sc_acid_${i}`).value;
@@ -1565,7 +1343,6 @@ function buildSamplePayload(i, status) {
   f["Overall"] = document.getElementById(`m_sc_over_${i}`).value;
   f["Score Detail"] = document.getElementById(`m_total_${i}`).innerText;
 
-  // Intensities & Notes
   f["Sweetness-Intensity"] = document.getElementById(`m_sw_int_${i}`).value;
   f["Acidity-Intensity"] = document.getElementById(`m_ac_int_${i}`).value;
   f["Acidity-Type"] = getCheckedValues(`m_ac_type_${i}`);
@@ -1583,7 +1360,6 @@ function buildSamplePayload(i, status) {
   f["Flavour-Extra Notes"] = document.getElementById(`m_fl_extra_${i}`).value.trim();
   f["Flavour-Negative"] = document.getElementById(`m_fl_neg_${i}`).value.trim();
 
-  // Defects
   f["Defect-Intensity"] = document.getElementById(`m_def_int_ov_${i}`).value;
   f["Defect-Type"] = getCheckedValues(`m_def_typ_ov_${i}`);
   f["Defect-Intensity (Cup1)"] = document.getElementById(`m_def_int_c1_${i}`).value;
@@ -1593,13 +1369,11 @@ function buildSamplePayload(i, status) {
   f["Defect-Intensity (Cup3)"] = document.getElementById(`m_def_int_c3_${i}`).value;
   f["Defect-Type (Cup3)"] = getCheckedValues(`m_def_typ_c3_${i}`);
 
-  // Overall & Roasting
   f["Overall-Notes"] = document.getElementById(`m_ov_note_${i}`).value.trim();
   f["Overall-Negative"] = document.getElementById(`m_ov_neg_${i}`).value.trim();
   f["Possible Roasting point"] = getCheckedValues(`m_roast_pos_${i}`);
   f["Roasting point Recommendation"] = getCheckedValues(`m_roast_rec_${i}`);
 
-  // Comments
   f["Short description"] = document.getElementById(`m_shortDesc_${i}`).value.trim();
   f["Price list Notes"] = document.getElementById(`m_priceNote_${i}`).value.trim();
   f["Sensory Quality Comment"] = document.getElementById(`m_comm_${i}`).value.trim();
@@ -1611,31 +1385,17 @@ function getCheckedValues(name) {
   return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value).join(', ');
 }
 
-// 3. 개별 시트 저장
-function saveIndividualDraft(i) {
-  const cName = document.getElementById(`m_name_${i}`).value.trim();
-  if (!cName) {
-    alert(`Sample #${i}의 Coffee Name을 입력해주세요.`);
-    return;
-  }
-  const payload = buildSamplePayload(i, "Draft");
-  sendToServer(payload, `💾 Sample #${i} 데이터가 구글 시트에 임시저장되었습니다.`);
-}
-
-// 4. 다중 일괄 시트 저장
 function saveMultiDrafts() {
   const count = parseInt(document.getElementById('multiSampleCount').value) || 6;
   let savedCount = 0;
-
   for (let i = 1; i <= count; i++) {
     const cName = document.getElementById(`m_name_${i}`).value.trim();
     if (cName) {
       const payload = buildSamplePayload(i, "Draft");
-      sendToServer(payload, null); // 개별 알림 없이 전송
+      sendToServer(payload, null); 
       savedCount++;
     }
   }
-
   if (savedCount === 0) {
     alert("저장할 샘플의 Coffee Name을 1개 이상 입력해주세요.");
   } else {
@@ -1643,7 +1403,31 @@ function saveMultiDrafts() {
   }
 }
 
-// 5. 시트 Draft 객체에서 샘플 영역으로 데이터 복원 유틸
+function submitMultiForm() {
+  const count = parseInt(document.getElementById('multiSampleCount').value) || 6;
+  let savedCount = 0;
+  
+  if(!confirm("🚀 일괄 검사를 완료하시겠습니까?\n완료 처리된 데이터는 앱에서 수정할 수 없습니다.")) {
+    return;
+  }
+
+  for (let i = 1; i <= count; i++) {
+    const cName = document.getElementById(`m_name_${i}`).value.trim();
+    if (cName) {
+      const payload = buildSamplePayload(i, "Completed");
+      sendToServer(payload, null); 
+      savedCount++;
+    }
+  }
+  
+  if (savedCount === 0) {
+    alert("완료할 샘플의 Coffee Name을 1개 이상 입력해주세요.");
+  } else {
+    alert(`🚀 ${savedCount}개 샘플 데이터가 성공적으로 검사 완료 처리되었습니다!`);
+    renderMultiGrid(); // 완료 후 폼 초기화
+  }
+}
+
 function restoreSampleDataFromDraft(i, f) {
   if (!f) return;
   document.getElementById(`m_name_${i}`).value = f["Coffee Name"] || "";
@@ -1697,7 +1481,6 @@ function restoreSampleDataFromDraft(i, f) {
   document.getElementById(`m_priceNote_${i}`).value = f["Price list Notes"] || "";
   document.getElementById(`m_comm_${i}`).value = f["Sensory Quality Comment"] || "";
 
-  // 멀티셀렉트 버튼 라벨 동기화
   updateMultiLabel(`m_ac_type_${i}_pop`, `m_ac_type_btn_${i}`, 'Acidity 종류');
   updateMultiLabel(`m_def_typ_ov_${i}_pop`, `m_def_typ_ov_btn_${i}`, 'Defect 종류');
   updateMultiLabel(`m_def_typ_c1_${i}_pop`, `m_def_typ_c1_btn_${i}`, 'Defect 종류');
@@ -1714,7 +1497,8 @@ function setCheckboxes(name, commaStr) {
   });
 }
 </script>
-  <!-- 💡 개별 / 다중 불러오기 공용 모달 -->
+
+<!-- 💡 개별 / 다중 불러오기 공용 모달 -->
 <div id="draftModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
   <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-4 space-y-4">
     <div class="flex justify-between items-center border-b pb-2">
@@ -1730,5 +1514,6 @@ function setCheckboxes(name, commaStr) {
     </div>
   </div>
 </div>
+
 </body>
 </html>
