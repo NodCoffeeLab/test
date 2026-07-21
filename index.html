@@ -57,7 +57,7 @@ let loadedDraftsCache = [];
 
   <form id="multiCuppingForm" class="hidden space-y-4">
     
-    <!-- 상단 컨트롤 바 (샘플 수 제어 및 일괄 버튼) -->
+<!-- 상단 컨트롤 바 (샘플 수 제어 및 일괄 버튼) -->
     <div class="bg-white p-3 rounded-xl shadow-sm border flex flex-wrap items-center justify-between gap-2">
       <div class="flex items-center gap-3">
         <label class="text-xs font-bold text-gray-700">샘플 수</label>
@@ -75,10 +75,13 @@ let loadedDraftsCache = [];
       </div>
       
       <div class="flex items-center gap-2">
-        <button type="button" onclick="saveMultiLocalDraft()" class="px-4 py-2 bg-amber-500 text-white font-bold text-xs rounded-lg shadow active:scale-95">
-          💾 다중 로컬 임시저장
+        <button type="button" onclick="openMultiDraftModal()" class="px-3 py-2 bg-blue-600 text-white font-bold text-xs rounded-lg shadow active:scale-95">
+          📂 다중 불러오기
         </button>
-        <button type="button" onclick="submitMultiForm()" class="px-4 py-2 bg-purple-600 text-white font-bold text-xs rounded-lg shadow active:scale-95">
+        <button type="button" onclick="saveMultiDrafts()" class="px-3 py-2 bg-amber-500 text-white font-bold text-xs rounded-lg shadow active:scale-95">
+          💾 다중 일괄 저장
+        </button>
+        <button type="button" onclick="submitMultiForm()" class="px-3 py-2 bg-purple-600 text-white font-bold text-xs rounded-lg shadow active:scale-95">
           🚀 다중 일괄 검사 완료
         </button>
       </div>
@@ -1016,6 +1019,24 @@ function calcMultiTotal(i) {
   if(totalEl) totalEl.innerText = sum.toFixed(2);
 }
 
+// ==========================================
+// 💡 UI 비율 재조정 정밀 Flex/Grid 렌더러
+// ==========================================
+
+function updateMultiLabel(popId, btnId, defaultText) {
+  const pop = document.getElementById(popId);
+  const btn = document.getElementById(btnId);
+  if (!pop || !btn) return;
+
+  const checked = Array.from(pop.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+  
+  if (checked.length === 0) {
+    btn.innerText = `${defaultText} ▼`;
+  } else {
+    btn.innerText = `${checked.join(', ')} ▼`;
+  }
+}
+
 function renderMultiGrid() {
   const container = document.getElementById('multiGridContainer');
   const count = parseInt(document.getElementById('multiSampleCount').value) || 6;
@@ -1035,16 +1056,16 @@ function renderMultiGrid() {
         <span class="font-bold text-gray-800 text-sm">☕ Sample #${i}</span>
         <div class="flex items-center gap-2">
           <button type="button" onclick="saveIndividualDraft(${i})" class="px-2.5 py-1 bg-amber-500 text-white font-bold text-xs rounded hover:bg-amber-600">💾 개별 저장</button>
-          <button type="button" onclick="loadIndividualDraft(${i})" class="px-2.5 py-1 bg-blue-600 text-white font-bold text-xs rounded hover:bg-blue-700">📂 개별 불러오기</button>
+          <button type="button" onclick="openIndividualDraftModal(${i})" class="px-2.5 py-1 bg-blue-600 text-white font-bold text-xs rounded hover:bg-blue-700">📂 개별 불러오기</button>
           <button type="button" onclick="copySampleToNext(${i})" class="px-2.5 py-1 bg-purple-100 text-purple-700 font-bold text-xs rounded hover:bg-purple-200">📋 다음 샘플로 복사</button>
         </div>
       </div>
 
-      <!-- 메인 3개 독립 열 레이아웃 (좌측 / 중앙 / 우측) -->
+      <!-- 메인 3개 독립 열 레이아웃 -->
       <div class="flex gap-2 items-stretch">
 
         <!-- 1. [좌측 열] 커피 정보 & Score -->
-        <div class="w-44 flex-shrink-0 flex flex-col justify-between gap-2">
+        <div class="w-40 flex-shrink-0 flex flex-col justify-between gap-2">
           <div class="border rounded-lg p-2 bg-gray-50/50 space-y-1 flex-1">
             <span class="font-bold text-gray-700 block border-b pb-1">커피 정보</span>
             <input type="text" id="m_name_${i}" placeholder="Coffee Name" class="w-full p-1 border rounded bg-white">
@@ -1063,34 +1084,34 @@ function renderMultiGrid() {
           
           <div class="border rounded-lg p-2 bg-gray-50/50 space-y-1">
             <span class="font-bold text-gray-700 block">Score</span>
-            <div class="border p-2 rounded text-center bg-white">
+            <div class="border p-1.5 rounded text-center bg-white">
               <span class="text-[11px] text-gray-500 font-bold block">총 점수</span>
               <span id="m_total_${i}" class="text-xl font-bold text-gray-800">84.00</span>
             </div>
           </div>
         </div>
 
-        <!-- 2. [중앙 영역] 상단 4개 구역 / 하단 3개 구역 -->
+        <!-- 2. [중앙 영역] 상단/하단 영역 -->
         <div class="flex-1 flex flex-col justify-between gap-2">
 
           <!-- 중앙 상단 행 -->
-          <div class="flex gap-2 h-[140px]">
+          <div class="flex gap-2 h-[125px]">
             
-            <!-- Clean & Sweet (세로 배치) -->
-            <div class="w-28 flex-shrink-0 border rounded-lg p-1.5 bg-gray-50/50 flex flex-col justify-between">
+            <!-- Clean & Sweet -->
+            <div class="w-24 flex-shrink-0 border rounded-lg p-1.5 bg-gray-50/50 flex flex-col justify-between">
               <div>
-                <span class="font-bold text-gray-700 block mb-1">Clean</span>
+                <span class="font-bold text-gray-700 block mb-0.5">Clean</span>
                 <input type="number" id="m_sc_clean_${i}" value="6.00" step="0.25" onchange="calcMultiTotal(${i})" class="w-full p-1 border rounded bg-white text-center font-bold">
               </div>
               <div class="border-t pt-1">
-                <span class="font-bold text-gray-700 block mb-1">Sweet</span>
+                <span class="font-bold text-gray-700 block mb-0.5">Sweet</span>
                 <input type="number" id="m_sc_sweet_${i}" value="6.00" step="0.25" onchange="calcMultiTotal(${i})" class="w-full p-1 border rounded bg-white text-center font-bold mb-1">
                 <select id="m_sw_int_${i}" class="w-full p-0.5 border rounded bg-white font-medium text-[10px]">${intensityOpts}</select>
               </div>
             </div>
 
-            <!-- Acidity (좌: 점수/강도, 우: 세로 가득 찬 Acidity 종류) -->
-            <div class="w-48 flex-shrink-0 border rounded-lg p-1.5 bg-gray-50/50 flex flex-col">
+            <!-- Acidity (표시 상자 및 폭 대폭 확장) -->
+            <div class="w-56 flex-shrink-0 border rounded-lg p-1.5 bg-gray-50/50 flex flex-col">
               <span class="font-bold text-gray-700 block mb-1">Acidity</span>
               <div class="flex gap-1.5 flex-1">
                 <div class="w-20 space-y-1 flex flex-col justify-center">
@@ -1098,8 +1119,8 @@ function renderMultiGrid() {
                   <select id="m_ac_int_${i}" class="w-full p-0.5 border rounded bg-white font-medium text-[10px]">${intensityOpts}</select>
                 </div>
                 <div class="flex-1 h-full relative">
-                  <button type="button" id="m_ac_type_btn_${i}" onclick="toggleMultiSelect('m_ac_type_${i}')" class="w-full h-full border rounded bg-white text-gray-700 font-medium text-center flex items-center justify-center p-1">Acidity 종류 ▼</button>
-                  <div id="m_ac_type_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-44 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
+                  <button type="button" id="m_ac_type_btn_${i}" onclick="toggleMultiSelect('m_ac_type_${i}')" class="w-full h-full border rounded bg-white text-gray-700 font-medium text-left p-1.5 overflow-y-auto leading-tight text-[11px]">Acidity 종류 ▼</button>
+                  <div id="m_ac_type_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-48 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
                     ${acidityTypeBoxes(i)}
                   </div>
                 </div>
@@ -1131,10 +1152,10 @@ function renderMultiGrid() {
           </div>
 
           <!-- 중앙 하단 행 -->
-          <div class="flex gap-2 h-[155px]">
+          <div class="flex gap-2 h-[145px]">
             
-            <!-- Defect -->
-            <div class="w-64 flex-shrink-0 border rounded-lg p-1.5 bg-gray-50/50 flex flex-col justify-between">
+            <!-- Defect (가로 폭 및 표시 버튼 확장) -->
+            <div class="w-72 flex-shrink-0 border rounded-lg p-1.5 bg-gray-50/50 flex flex-col justify-between">
               <span class="font-bold text-gray-700 block">Defect</span>
               
               <div class="flex items-center gap-1">
@@ -1142,7 +1163,7 @@ function renderMultiGrid() {
                 <select id="m_def_int_ov_${i}" class="w-16 p-0.5 border rounded bg-white text-[10px]">${intensityOpts}<option value="None" selected>None</option></select>
                 <div class="relative flex-1">
                   <button type="button" id="m_def_typ_ov_btn_${i}" onclick="toggleMultiSelect('m_def_typ_ov_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate text-[10px]">Defect 종류 ▼</button>
-                  <div id="m_def_typ_ov_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-44 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
+                  <div id="m_def_typ_ov_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-48 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
                     ${defectTypeBoxes(i, 'ov')}
                   </div>
                 </div>
@@ -1153,7 +1174,7 @@ function renderMultiGrid() {
                 <select id="m_def_int_c1_${i}" class="w-16 p-0.5 border rounded bg-white text-[10px]">${intensityOpts}<option value="None" selected>None</option></select>
                 <div class="relative flex-1">
                   <button type="button" id="m_def_typ_c1_btn_${i}" onclick="toggleMultiSelect('m_def_typ_c1_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate text-[10px]">Defect 종류 ▼</button>
-                  <div id="m_def_typ_c1_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-44 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
+                  <div id="m_def_typ_c1_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-48 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
                     ${defectTypeBoxes(i, 'c1')}
                   </div>
                 </div>
@@ -1164,7 +1185,7 @@ function renderMultiGrid() {
                 <select id="m_def_int_c2_${i}" class="w-16 p-0.5 border rounded bg-white text-[10px]">${intensityOpts}<option value="None" selected>None</option></select>
                 <div class="relative flex-1">
                   <button type="button" id="m_def_typ_c2_btn_${i}" onclick="toggleMultiSelect('m_def_typ_c2_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate text-[10px]">Defect 종류 ▼</button>
-                  <div id="m_def_typ_c2_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-44 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
+                  <div id="m_def_typ_c2_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-48 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
                     ${defectTypeBoxes(i, 'c2')}
                   </div>
                 </div>
@@ -1175,7 +1196,7 @@ function renderMultiGrid() {
                 <select id="m_def_int_c3_${i}" class="w-16 p-0.5 border rounded bg-white text-[10px]">${intensityOpts}<option value="None" selected>None</option></select>
                 <div class="relative flex-1">
                   <button type="button" id="m_def_typ_c3_btn_${i}" onclick="toggleMultiSelect('m_def_typ_c3_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate text-[10px]">Defect 종류 ▼</button>
-                  <div id="m_def_typ_c3_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-44 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
+                  <div id="m_def_typ_c3_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-48 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
                     ${defectTypeBoxes(i, 'c3')}
                   </div>
                 </div>
@@ -1198,14 +1219,14 @@ function renderMultiGrid() {
               <input type="text" id="m_fl_neg_${i}" placeholder="Flavour Negative" class="w-full p-1 border rounded bg-white text-gray-500">
             </div>
 
-            <!-- Balance & Overall 점수 (세로 스택) -->
-            <div class="w-24 flex-shrink-0 flex flex-col justify-between gap-1">
-              <div class="border rounded-lg p-1.5 bg-gray-50/50 flex-1 flex flex-col justify-center">
-                <span class="font-bold text-gray-700 block mb-1">Balance</span>
+            <!-- Balance & Overall 점수 -->
+            <div class="w-20 flex-shrink-0 flex flex-col justify-between gap-1">
+              <div class="border rounded-lg p-1 bg-gray-50/50 flex-1 flex flex-col justify-center">
+                <span class="font-bold text-gray-700 block mb-0.5 text-[11px]">Balance</span>
                 <input type="number" id="m_sc_bal_${i}" value="6.00" step="0.25" onchange="calcMultiTotal(${i})" class="w-full p-1 border rounded bg-white text-center font-bold">
               </div>
-              <div class="border rounded-lg p-1.5 bg-gray-50/50 flex-1 flex flex-col justify-center">
-                <span class="font-bold text-gray-700 block mb-1">Overall</span>
+              <div class="border rounded-lg p-1 bg-gray-50/50 flex-1 flex flex-col justify-center">
+                <span class="font-bold text-gray-700 block mb-0.5 text-[11px]">Overall</span>
                 <input type="number" id="m_sc_over_${i}" value="6.00" step="0.25" onchange="calcMultiTotal(${i})" class="w-full p-1 border rounded bg-white text-center font-bold">
               </div>
             </div>
@@ -1214,23 +1235,23 @@ function renderMultiGrid() {
 
         </div>
 
-        <!-- 3. [우측 독립 열] (Overall 노트 / Roasting Point) -->
-        <div class="w-48 flex-shrink-0 flex flex-col justify-between gap-2">
+        <!-- 3. [우측 독립 열] (Overall 노트 축소 & Roasting Point 확충) -->
+        <div class="w-56 flex-shrink-0 flex flex-col justify-between gap-2">
           
           <!-- Overall 노트 (상단) -->
-          <div class="border rounded-lg p-2 bg-gray-50/50 space-y-1.5 flex-1 flex flex-col justify-between">
-            <span class="font-bold text-gray-700 block border-b pb-1">Overall</span>
-            <textarea id="m_ov_note_${i}" rows="2" placeholder="Overall 노트" class="w-full p-1.5 border rounded bg-white resize-none flex-1"></textarea>
-            <textarea id="m_ov_neg_${i}" rows="2" placeholder="Overall Negative" class="w-full p-1.5 border rounded bg-white text-gray-500 resize-none flex-1"></textarea>
+          <div class="border rounded-lg p-2 bg-gray-50/50 space-y-1 flex-1 flex flex-col justify-between">
+            <span class="font-bold text-gray-700 block border-b pb-0.5">Overall</span>
+            <textarea id="m_ov_note_${i}" rows="2" placeholder="Overall 노트" class="w-full p-1 border rounded bg-white resize-none flex-1 text-[11px]"></textarea>
+            <textarea id="m_ov_neg_${i}" rows="2" placeholder="Overall Negative" class="w-full p-1 border rounded bg-white text-gray-500 resize-none flex-1 text-[11px]"></textarea>
           </div>
 
-          <!-- Roasting Point (하단) -->
-          <div class="border rounded-lg p-2 bg-gray-50/50 space-y-2">
+          <!-- Roasting Point (하단 - 폭 및 표시상자 확대) -->
+          <div class="border rounded-lg p-2 bg-gray-50/50 space-y-1.5">
             <div>
               <span class="font-bold text-gray-700 block text-[11px] mb-0.5">Possible Roasting point</span>
               <div class="relative">
                 <button type="button" id="m_roast_pos_btn_${i}" onclick="toggleMultiSelect('m_roast_pos_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate text-[10px]">Roasting point 선택 ▼</button>
-                <div id="m_roast_pos_${i}_pop" class="hidden absolute right-0 top-full mt-1 w-44 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
+                <div id="m_roast_pos_${i}_pop" class="hidden absolute right-0 top-full mt-1 w-48 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
                   ${roastPointBoxes(i, 'pos')}
                 </div>
               </div>
@@ -1240,7 +1261,7 @@ function renderMultiGrid() {
               <span class="font-bold text-gray-700 block text-[11px] mb-0.5">Roasting point Recommendation</span>
               <div class="relative">
                 <button type="button" id="m_roast_rec_btn_${i}" onclick="toggleMultiSelect('m_roast_rec_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left truncate text-[10px]">Roasting point 선택 ▼</button>
-                <div id="m_roast_rec_${i}_pop" class="hidden absolute right-0 top-full mt-1 w-44 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
+                <div id="m_roast_rec_${i}_pop" class="hidden absolute right-0 top-full mt-1 w-48 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
                   ${roastPointBoxes(i, 'rec')}
                 </div>
               </div>
@@ -1251,13 +1272,13 @@ function renderMultiGrid() {
 
       </div>
 
-      <!-- 4. [하단 전체 열] Comment (3분할) -->
+      <!-- 4. [하단 전체 열] Comment (20% : 20% : 60% 비율 재할당) -->
       <div class="border rounded-lg p-2 bg-gray-50/50 space-y-1">
         <span class="font-bold text-gray-700 block">Comment</span>
-        <div class="grid grid-cols-3 gap-2">
-          <textarea id="m_shortDesc_${i}" rows="2" placeholder="Short Description" class="w-full p-1.5 border rounded bg-white resize-none"></textarea>
-          <textarea id="m_priceNote_${i}" rows="2" placeholder="Price List Notes" class="w-full p-1.5 border rounded bg-white resize-none"></textarea>
-          <textarea id="m_comm_${i}" rows="2" placeholder="Sensory Quality Comment" class="w-full p-1.5 border rounded bg-white resize-none"></textarea>
+        <div class="flex gap-2">
+          <input type="text" id="m_shortDesc_${i}" placeholder="Short Description" class="w-[20%] p-1.5 border rounded bg-white">
+          <input type="text" id="m_priceNote_${i}" placeholder="Price List Notes" class="w-[20%] p-1.5 border rounded bg-white">
+          <textarea id="m_comm_${i}" rows="2" placeholder="Sensory Quality Comment" class="w-[60%] p-1.5 border rounded bg-white resize-none"></textarea>
         </div>
       </div>
 
@@ -1402,6 +1423,312 @@ function restoreSampleData(i, data) {
   updateMultiLabel(`m_roast_pos_${i}_pop`, `m_roast_pos_btn_${i}`, 'Roasting point 선택');
   updateMultiLabel(`m_roast_rec_${i}_pop`, `m_roast_rec_btn_${i}`, 'Roasting point 선택');
 }
+  // ==========================================
+// 💡 구글 시트 연동 개별/다중 저장 및 불러오기 로직
+// ==========================================
+
+let targetIndividualIdx = null;
+
+// 모달 닫기
+function closeDraftModal() {
+  document.getElementById('draftModal').classList.add('hidden');
+}
+
+// 1. 개별 불러오기 모달 열기
+function openIndividualDraftModal(i) {
+  targetIndividualIdx = i;
+  const modal = document.getElementById('draftModal');
+  const title = document.getElementById('draftModalTitle');
+  const list = document.getElementById('draftModalList');
+  const confirmBtn = document.getElementById('draftModalConfirmBtn');
+
+  title.innerText = `📂 Sample #${i} - 개별 임시저장 불러오기`;
+  list.innerHTML = '';
+
+  if (!loadedDraftsCache || loadedDraftsCache.length === 0) {
+    list.innerHTML = '<div class="text-center py-4 text-gray-400">저장된 임시저장 데이터가 없습니다.</div>';
+  } else {
+    loadedDraftsCache.forEach(draft => {
+      const f = draft.fields || {};
+      const name = f["Coffee Name"] || "이름 없음";
+      const date = f["Cupping Date"] || "";
+      const lot = f["Lot Code"] ? ` (${f["Lot Code"]})` : "";
+      
+      list.innerHTML += `
+        <label class="flex items-center justify-between p-2 border rounded hover:bg-purple-50 cursor-pointer">
+          <div class="flex items-center gap-2">
+            <input type="radio" name="indivDraftSelect" value="${draft.rowId}" class="text-purple-600">
+            <span class="font-bold text-gray-800">${name}</span>
+            <span class="text-gray-500">${date}${lot}</span>
+          </div>
+        </label>
+      `;
+    });
+  }
+
+  confirmBtn.onclick = function() {
+    const selected = document.querySelector('input[name="indivDraftSelect"]:checked');
+    if (!selected) {
+      alert("불러올 항목을 선택해주세요.");
+      return;
+    }
+    const draft = loadedDraftsCache.find(d => d.rowId === parseInt(selected.value));
+    if (draft) {
+      restoreSampleDataFromDraft(targetIndividualIdx, draft.fields);
+      calcMultiTotal(targetIndividualIdx);
+      closeDraftModal();
+      alert(`Sample #${targetIndividualIdx}에 선택한 정보가 반영되었습니다.`);
+    }
+  };
+
+  modal.classList.remove('hidden');
+}
+
+// 2. 다중 불러오기 모달 열기 (체크박스 순차 매핑)
+function openMultiDraftModal() {
+  const modal = document.getElementById('draftModal');
+  const title = document.getElementById('draftModalTitle');
+  const list = document.getElementById('draftModalList');
+  const confirmBtn = document.getElementById('draftModalConfirmBtn');
+
+  title.innerText = `📂 다중 임시저장 불러오기 (체크박스 선택 순서대로 매핑)`;
+  list.innerHTML = '';
+
+  if (!loadedDraftsCache || loadedDraftsCache.length === 0) {
+    list.innerHTML = '<div class="text-center py-4 text-gray-400">저장된 임시저장 데이터가 없습니다.</div>';
+  } else {
+    loadedDraftsCache.forEach(draft => {
+      const f = draft.fields || {};
+      const name = f["Coffee Name"] || "이름 없음";
+      const date = f["Cupping Date"] || "";
+      const lot = f["Lot Code"] ? ` (${f["Lot Code"]})` : "";
+      
+      list.innerHTML += `
+        <label class="flex items-center justify-between p-2 border rounded hover:bg-purple-50 cursor-pointer">
+          <div class="flex items-center gap-2">
+            <input type="checkbox" name="multiDraftSelect" value="${draft.rowId}" class="rounded text-purple-600">
+            <span class="font-bold text-gray-800">${name}</span>
+            <span class="text-gray-500">${date}${lot}</span>
+          </div>
+        </label>
+      `;
+    });
+  }
+
+  confirmBtn.onclick = function() {
+    const checkedEls = Array.from(document.querySelectorAll('input[name="multiDraftSelect"]:checked'));
+    if (checkedEls.length === 0) {
+      alert("불러올 항목을 최소 1개 이상 선택해주세요.");
+      return;
+    }
+
+    const count = parseInt(document.getElementById('multiSampleCount').value) || 6;
+    if (checkedEls.length > count) {
+      alert(`현재 설정된 샘플 수(${count}개)보다 많은 항목을 선택했습니다. 상단 샘플 수를 조정하거나 ${count}개 이하로 선택해주세요.`);
+      return;
+    }
+
+    checkedEls.forEach((cb, idx) => {
+      const sampleIdx = idx + 1;
+      const draft = loadedDraftsCache.find(d => d.rowId === parseInt(cb.value));
+      if (draft) {
+        restoreSampleDataFromDraft(sampleIdx, draft.fields);
+        calcMultiTotal(sampleIdx);
+      }
+    });
+
+    closeDraftModal();
+    alert(`선택한 ${checkedEls.length}개의 데이터가 Sample #1부터 순차적으로 매핑되었습니다.`);
+  };
+
+  modal.classList.remove('hidden');
+}
+
+// 개별/다중 저장 시 활용할 페이로드 변환 유틸
+function buildSamplePayload(i, status) {
+  const f = {};
+  f["Coffee Name"] = document.getElementById(`m_name_${i}`).value.trim();
+  f["Lot Code"] = document.getElementById(`m_lotCode_${i}`).value.trim();
+  f["Lot Number"] = document.getElementById(`m_lotNum_${i}`).value.trim();
+  f["Cupping Date"] = document.getElementById(`m_date_${i}`).value;
+  f["Roasting Profile"] = document.getElementById(`m_roast_${i}`).value.trim();
+  f["Roaster"] = document.getElementById(`m_roaster_${i}`).value;
+
+  // Scores
+  f["Clean Cup"] = document.getElementById(`m_sc_clean_${i}`).value;
+  f["Sweetness"] = document.getElementById(`m_sc_sweet_${i}`).value;
+  f["Acidity"] = document.getElementById(`m_sc_acid_${i}`).value;
+  f["Mouthfeel"] = document.getElementById(`m_sc_mouth_${i}`).value;
+  f["Flavour"] = document.getElementById(`m_sc_flav_${i}`).value;
+  f["Aftertaste"] = document.getElementById(`m_sc_after_${i}`).value;
+  f["Balance"] = document.getElementById(`m_sc_bal_${i}`).value;
+  f["Overall"] = document.getElementById(`m_sc_over_${i}`).value;
+  f["Score Detail"] = document.getElementById(`m_total_${i}`).innerText;
+
+  // Intensities & Notes
+  f["Sweetness-Intensity"] = document.getElementById(`m_sw_int_${i}`).value;
+  f["Acidity-Intensity"] = document.getElementById(`m_ac_int_${i}`).value;
+  f["Acidity-Type"] = getCheckedValues(`m_ac_type_${i}`);
+
+  f["Mouthfeel-Intensity"] = document.getElementById(`m_mf_int_${i}`).value;
+  f["Mouthfeel-Notes"] = document.getElementById(`m_mf_note_${i}`).value.trim();
+  f["Mouthfeel-Negative"] = document.getElementById(`m_mf_neg_${i}`).value.trim();
+
+  f["Aftertaste-Intensity"] = document.getElementById(`m_af_int_${i}`).value;
+  f["Aftertaste-Notes"] = document.getElementById(`m_af_note_${i}`).value.trim();
+  f["Aftertaste-Negative"] = document.getElementById(`m_af_neg_${i}`).value.trim();
+
+  f["Flavour-Intensity"] = document.getElementById(`m_fl_int_${i}`).value;
+  f["Main Flavour-Top Notes"] = document.getElementById(`m_fl_top_${i}`).value.trim();
+  f["Flavour-Extra Notes"] = document.getElementById(`m_fl_extra_${i}`).value.trim();
+  f["Flavour-Negative"] = document.getElementById(`m_fl_neg_${i}`).value.trim();
+
+  // Defects
+  f["Defect-Intensity"] = document.getElementById(`m_def_int_ov_${i}`).value;
+  f["Defect-Type"] = getCheckedValues(`m_def_typ_ov_${i}`);
+  f["Defect-Intensity (Cup1)"] = document.getElementById(`m_def_int_c1_${i}`).value;
+  f["Defect-Type (Cup1)"] = getCheckedValues(`m_def_typ_c1_${i}`);
+  f["Defect-Intensity (Cup2)"] = document.getElementById(`m_def_int_c2_${i}`).value;
+  f["Defect-Type (Cup2)"] = getCheckedValues(`m_def_typ_c2_${i}`);
+  f["Defect-Intensity (Cup3)"] = document.getElementById(`m_def_int_c3_${i}`).value;
+  f["Defect-Type (Cup3)"] = getCheckedValues(`m_def_typ_c3_${i}`);
+
+  // Overall & Roasting
+  f["Overall-Notes"] = document.getElementById(`m_ov_note_${i}`).value.trim();
+  f["Overall-Negative"] = document.getElementById(`m_ov_neg_${i}`).value.trim();
+  f["Possible Roasting point"] = getCheckedValues(`m_roast_pos_${i}`);
+  f["Roasting point Recommendation"] = getCheckedValues(`m_roast_rec_${i}`);
+
+  // Comments
+  f["Short description"] = document.getElementById(`m_shortDesc_${i}`).value.trim();
+  f["Price list Notes"] = document.getElementById(`m_priceNote_${i}`).value.trim();
+  f["Sensory Quality Comment"] = document.getElementById(`m_comm_${i}`).value.trim();
+
+  return { formType: "cupping", status: status, fields: f };
+}
+
+function getCheckedValues(name) {
+  return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value).join(', ');
+}
+
+// 3. 개별 시트 저장
+function saveIndividualDraft(i) {
+  const cName = document.getElementById(`m_name_${i}`).value.trim();
+  if (!cName) {
+    alert(`Sample #${i}의 Coffee Name을 입력해주세요.`);
+    return;
+  }
+  const payload = buildSamplePayload(i, "Draft");
+  sendToServer(payload, `💾 Sample #${i} 데이터가 구글 시트에 임시저장되었습니다.`);
+}
+
+// 4. 다중 일괄 시트 저장
+function saveMultiDrafts() {
+  const count = parseInt(document.getElementById('multiSampleCount').value) || 6;
+  let savedCount = 0;
+
+  for (let i = 1; i <= count; i++) {
+    const cName = document.getElementById(`m_name_${i}`).value.trim();
+    if (cName) {
+      const payload = buildSamplePayload(i, "Draft");
+      sendToServer(payload, null); // 개별 알림 없이 전송
+      savedCount++;
+    }
+  }
+
+  if (savedCount === 0) {
+    alert("저장할 샘플의 Coffee Name을 1개 이상 입력해주세요.");
+  } else {
+    alert(`💾 입력된 ${savedCount}개 샘플 데이터가 구글 시트에 일괄 저장되었습니다.`);
+  }
+}
+
+// 5. 시트 Draft 객체에서 샘플 영역으로 데이터 복원 유틸
+function restoreSampleDataFromDraft(i, f) {
+  if (!f) return;
+  document.getElementById(`m_name_${i}`).value = f["Coffee Name"] || "";
+  document.getElementById(`m_lotCode_${i}`).value = f["Lot Code"] || "";
+  document.getElementById(`m_lotNum_${i}`).value = f["Lot Number"] || "";
+  document.getElementById(`m_date_${i}`).value = f["Cupping Date"] || new Date().toISOString().substring(0, 10);
+  document.getElementById(`m_roast_${i}`).value = f["Roasting Profile"] || "";
+  document.getElementById(`m_roaster_${i}`).value = f["Roaster"] || "";
+
+  document.getElementById(`m_sc_clean_${i}`).value = parseFloat(f["Clean Cup"] || 6.00).toFixed(2);
+  document.getElementById(`m_sc_sweet_${i}`).value = parseFloat(f["Sweetness"] || 6.00).toFixed(2);
+  document.getElementById(`m_sc_acid_${i}`).value = parseFloat(f["Acidity"] || 6.00).toFixed(2);
+  document.getElementById(`m_sc_mouth_${i}`).value = parseFloat(f["Mouthfeel"] || 6.00).toFixed(2);
+  document.getElementById(`m_sc_flav_${i}`).value = parseFloat(f["Flavour"] || 6.00).toFixed(2);
+  document.getElementById(`m_sc_after_${i}`).value = parseFloat(f["Aftertaste"] || 6.00).toFixed(2);
+  document.getElementById(`m_sc_bal_${i}`).value = parseFloat(f["Balance"] || 6.00).toFixed(2);
+  document.getElementById(`m_sc_over_${i}`).value = parseFloat(f["Overall"] || 6.00).toFixed(2);
+
+  document.getElementById(`m_sw_int_${i}`).value = f["Sweetness-Intensity"] || "";
+  document.getElementById(`m_ac_int_${i}`).value = f["Acidity-Intensity"] || "";
+  setCheckboxes(`m_ac_type_${i}`, f["Acidity-Type"]);
+
+  document.getElementById(`m_mf_int_${i}`).value = f["Mouthfeel-Intensity"] || "";
+  document.getElementById(`m_mf_note_${i}`).value = f["Mouthfeel-Notes"] || "";
+  document.getElementById(`m_mf_neg_${i}`).value = f["Mouthfeel-Negative"] || "";
+
+  document.getElementById(`m_af_int_${i}`).value = f["Aftertaste-Intensity"] || "";
+  document.getElementById(`m_af_note_${i}`).value = f["Aftertaste-Notes"] || "";
+  document.getElementById(`m_af_neg_${i}`).value = f["Aftertaste-Negative"] || "";
+
+  document.getElementById(`m_fl_int_${i}`).value = f["Flavour-Intensity"] || "";
+  document.getElementById(`m_fl_top_${i}`).value = f["Main Flavour-Top Notes"] || "";
+  document.getElementById(`m_fl_extra_${i}`).value = f["Flavour-Extra Notes"] || "";
+  document.getElementById(`m_fl_neg_${i}`).value = f["Flavour-Negative"] || "";
+
+  document.getElementById(`m_def_int_ov_${i}`).value = f["Defect-Intensity"] || "None";
+  setCheckboxes(`m_def_typ_ov_${i}`, f["Defect-Type"]);
+  document.getElementById(`m_def_int_c1_${i}`).value = f["Defect-Intensity (Cup1)"] || "None";
+  setCheckboxes(`m_def_typ_c1_${i}`, f["Defect-Type (Cup1)"]);
+  document.getElementById(`m_def_int_c2_${i}`).value = f["Defect-Intensity (Cup2)"] || "None";
+  setCheckboxes(`m_def_typ_c2_${i}`, f["Defect-Type (Cup2)"]);
+  document.getElementById(`m_def_int_c3_${i}`).value = f["Defect-Intensity (Cup3)"] || "None";
+  setCheckboxes(`m_def_typ_c3_${i}`, f["Defect-Type (Cup3)"]);
+
+  document.getElementById(`m_ov_note_${i}`).value = f["Overall-Notes"] || "";
+  document.getElementById(`m_ov_neg_${i}`).value = f["Overall-Negative"] || "";
+  setCheckboxes(`m_roast_pos_${i}`, f["Possible Roasting point"]);
+  setCheckboxes(`m_roast_rec_${i}`, f["Roasting point Recommendation"]);
+
+  document.getElementById(`m_shortDesc_${i}`).value = f["Short description"] || "";
+  document.getElementById(`m_priceNote_${i}`).value = f["Price list Notes"] || "";
+  document.getElementById(`m_comm_${i}`).value = f["Sensory Quality Comment"] || "";
+
+  // 멀티셀렉트 버튼 라벨 동기화
+  updateMultiLabel(`m_ac_type_${i}_pop`, `m_ac_type_btn_${i}`, 'Acidity 종류');
+  updateMultiLabel(`m_def_typ_ov_${i}_pop`, `m_def_typ_ov_btn_${i}`, 'Defect 종류');
+  updateMultiLabel(`m_def_typ_c1_${i}_pop`, `m_def_typ_c1_btn_${i}`, 'Defect 종류');
+  updateMultiLabel(`m_def_typ_c2_${i}_pop`, `m_def_typ_c2_btn_${i}`, 'Defect 종류');
+  updateMultiLabel(`m_def_typ_c3_${i}_pop`, `m_def_typ_c3_btn_${i}`, 'Defect 종류');
+  updateMultiLabel(`m_roast_pos_${i}_pop`, `m_roast_pos_btn_${i}`, 'Roasting point 선택');
+  updateMultiLabel(`m_roast_rec_${i}_pop`, `m_roast_rec_btn_${i}`, 'Roasting point 선택');
+}
+
+function setCheckboxes(name, commaStr) {
+  const arr = commaStr ? commaStr.split(',').map(s => s.trim()) : [];
+  document.querySelectorAll(`input[name="${name}"]`).forEach(cb => {
+    cb.checked = arr.includes(cb.value);
+  });
+}
 </script>
+  <!-- 💡 개별 / 다중 불러오기 공용 모달 -->
+<div id="draftModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-4 space-y-4">
+    <div class="flex justify-between items-center border-b pb-2">
+      <h3 id="draftModalTitle" class="font-bold text-sm text-gray-800">📂 임시저장 불러오기</h3>
+      <button type="button" onclick="closeDraftModal()" class="text-gray-400 font-bold hover:text-gray-600">✕</button>
+    </div>
+    <div id="draftModalList" class="max-h-60 overflow-y-auto space-y-2 text-xs">
+      <!-- JS 동적 생성 -->
+    </div>
+    <div class="flex justify-end gap-2 border-t pt-2">
+      <button type="button" onclick="closeDraftModal()" class="px-3 py-1.5 bg-gray-200 text-gray-700 rounded text-xs font-bold">취소</button>
+      <button type="button" id="draftModalConfirmBtn" class="px-3 py-1.5 bg-purple-600 text-white rounded text-xs font-bold">확인</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
