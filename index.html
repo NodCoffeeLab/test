@@ -576,6 +576,11 @@ function updateRealtimePreview() {
 // 데이터 수집 및 서버 전송 (단일 폼)
 // ==========================================
 function getCuppingPayload(status) {
+  // 💡 [단일 폼 ID 선발급] 저장 전 rowId가 없다면 즉시 생성하여 덮어쓰기 대비
+  if (!currentDraftRowId) {
+    currentDraftRowId = "ID_" + Date.now();
+  }
+
   let payload = { 
     formType: "cupping", 
     status: status || "Completed",
@@ -1345,7 +1350,13 @@ function buildSamplePayload(i, status) {
   const f = {};
   
   const container = document.querySelector(`[data-sample-idx="${i}"]`);
-  const rowId = (container && container.dataset.rowId) ? container.dataset.rowId : null;
+  let rowId = (container && container.dataset.rowId) ? container.dataset.rowId : null;
+
+  // 💡 [다중 폼 ID 선발급] 해당 샘플에 rowId가 없다면 즉시 생성하여 DOM에 캐싱
+  if (!rowId) {
+    rowId = "ID_" + Date.now() + "_" + i; // 중복 방지를 위해 _i 추가
+    if (container) container.dataset.rowId = rowId;
+  }
 
   f["Coffee Name"] = document.getElementById(`m_name_${i}`).value.trim();
   f["Lot Code"] = document.getElementById(`m_lotCode_${i}`).value.trim();
