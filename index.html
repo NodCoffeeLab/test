@@ -48,7 +48,18 @@ let loadedDraftsCache = [];
       </select>
     </div>
   </div>
+  
+<!-- 💡 [신규] 모드 전환 탭 -->
+  <div class="flex mb-4 bg-gray-200 rounded-lg p-1">
+    <button type="button" id="tab-single" onclick="switchMode('single')" class="flex-1 py-2 text-sm font-bold rounded-md bg-white shadow text-purple-700 transition-all">단일 폼 (모바일)</button>
+    <button type="button" id="tab-multi" onclick="switchMode('multi')" class="flex-1 py-2 text-sm font-bold rounded-md text-gray-500 hover:text-gray-700 transition-all">다중 일괄 폼 (태블릿)</button>
+  </div>
 
+  <!-- 💡 [신규] 다중 입력용 폼 컨테이너 (초기엔 숨김 처리) -->
+  <form id="multiCuppingForm" class="hidden space-y-4">
+    <!-- 2단계에서 이곳에 2단 그리드 레이아웃이 들어갑니다 -->
+  </form>
+  
   <form id="cuppingForm" class="space-y-4">
     
     <!-- Group 1: 기본 정보 -->
@@ -769,6 +780,36 @@ function setValMulti(groupId, commaStr) {
     if(list.includes(b.innerText.trim())) b.classList.add('active-btn');
     else b.classList.remove('active-btn');
   });
+}
+  // ==========================================
+// 💡 모드 전환 제어 (단일 <-> 다중)
+// ==========================================
+function switchMode(mode) {
+  const container = document.getElementById('app-container');
+  const tabSingle = document.getElementById('tab-single');
+  const tabMulti = document.getElementById('tab-multi');
+  const formSingle = document.getElementById('cuppingForm');
+  const formMulti = document.getElementById('multiCuppingForm');
+
+  if (mode === 'single') {
+    // UI 변경
+    container.classList.replace('max-w-7xl', 'max-w-md'); // 모바일 너비로 축소
+    tabSingle.className = "flex-1 py-2 text-sm font-bold rounded-md bg-white shadow text-purple-700 transition-all";
+    tabMulti.className = "flex-1 py-2 text-sm font-bold rounded-md text-gray-500 hover:text-gray-700 transition-all";
+    
+    // 폼 전환
+    formSingle.classList.remove('hidden');
+    formMulti.classList.add('hidden');
+  } else {
+    // UI 변경
+    container.classList.replace('max-w-md', 'max-w-7xl'); // 태블릿 너비로 확장
+    tabMulti.className = "flex-1 py-2 text-sm font-bold rounded-md bg-white shadow text-purple-700 transition-all";
+    tabSingle.className = "flex-1 py-2 text-sm font-bold rounded-md text-gray-500 hover:text-gray-700 transition-all";
+    
+    // 폼 전환
+    formMulti.classList.remove('hidden');
+    formSingle.classList.add('hidden');
+  }
 }
 </script>
 </body>
