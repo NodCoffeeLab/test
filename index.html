@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>커핑 검사 결과 입력기</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#9333ea">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  .active-btn { background-color: #9333ea !important; color: white !important; border-color: #9333ea !important; }
+  .accordion-content { transition: max-height 0.3s ease-out; overflow: hidden; }
+  .accordion-content.closed { max-height: 0 !important; padding-top: 0 !important; padding-bottom: 0 !important; }
+</style>
+</head>
+<body class="bg-gray-50 min-h-screen pb-20 font-sans text-gray-800">
+
+<script>
+// 🛑 [필수 설정] 구글 앱스 스크립트 웹앱 주소
+const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycby9cDPGlltI5PIuZoIhXf6TnXNGlESM1CVNNT08a-whDA4wty0R4bPfOmnbK4_qlNiU/exec";
+</script>
+
+<!-- 상단 헤더 -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center bg-white p-3 shadow-sm border-b border-gray-200">
+  <div class="flex items-center gap-2">
+    <div class="h-8 w-8 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600 font-bold text-lg">☕</div>
+    <div>
+      <h1 class="text-sm font-bold text-gray-900 leading-tight">커핑 검사 결과 입력기</h1>
+      <p class="text-[10px] text-gray-400 font-mono">Cafe Nogales QC System</p>
+    </div>
+  </div>
+</header>
+<div class="h-16"></div>
+
+<div class="max-w-md mx-auto px-4 pt-4" id="app-container">
+
+  <!-- 임시저장 패널 -->
+  <div class="mb-5 bg-purple-50 border border-purple-200 p-4 rounded-xl flex items-center justify-between gap-3 shadow-sm">
+    <div class="flex-1">
+      <label class="block text-xs font-bold text-purple-800 mb-1">📂 진행 중인 임시저장 불러오기</label>
+      <select id="draftSelect" class="w-full bg-white border border-purple-200 rounded-lg p-2 text-xs focus:outline-none">
+        <option value="">-- 새로 작성하기 --</option>
+      </select>
+    </div>
+  </div>
+
+  <form id="cuppingForm" class="space-y-4">
+    
+    <!-- Group 1: 기본 정보 -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <button type="button" class="w-full px-4 py-3 bg-gray-50 flex justify-between font-bold text-sm border-b" onclick="toggleAcc(this)">
+        <span>1. 기본 정보</span> <span class="arrow text-gray-400">▲</span>
+      </button>
+      <div class="accordion-content p-4 space-y-3">
+        <div><label class="block text-xs font-semibold mb-1">Coffee Name</label><input type="text" id="cup_name" class="w-full p-2 border rounded-lg text-sm bg-gray-50"</div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block text-xs font-semibold mb-1">Lot Code</label><input type="text" id="cup_lotCode" class="w-full p-2 border rounded-lg text-sm"></div>
+          <div><label class="block text-xs font-semibold mb-1">Lot Number</label><input type="text" id="cup_lotNum" class="w-full p-2 border rounded-lg text-sm"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block text-xs font-semibold mb-1">Cupping Date</label><input type="date" id="cup_date" class="w-full p-2 border rounded-lg text-sm"></div>
+          <div><label class="block text-xs font-semibold mb-1">Roasting Profile</label><input type="text" id="cup_roastProfile" class="w-full p-2 border rounded-lg text-sm"></div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1">Roaster</label>
+          <div class="grid grid-cols-2 gap-1.5" id="group_roaster">
+            <button type="button" class="select-single py-2 text-xs border rounded-lg bg-gray-50">Ikawa V3</button>
+            <button type="button" class="select-single py-2 text-xs border rounded-lg bg-gray-50">Ikawa Pro 100</button>
+            <button type="button" class="select-single py-2 text-xs border rounded-lg bg-gray-50">Probat Sample Roaster</button>
+            <button type="button" class="select-single py-2 text-xs border rounded-lg bg-gray-50">Easyster</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Group 2: 디펙트 -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <button type="button" class="w-full px-4 py-3 bg-gray-50 flex justify-between font-bold text-sm border-b" onclick="toggleAcc(this)">
+        <span>2. 디펙트 (Defects)</span> <span class="arrow text-gray-400">▲</span>
+      </button>
+      <div class="accordion-content p-4 space-y-4" id="defect-container">
+        <!-- JS에서 4개 세트(Overall, Cup1, Cup2, Cup3) 렌더링 -->
+      </div>
+    </div>
+
+    <!-- Group 3: 센서리 점수 평가 -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <button type="button" class="w-full px-4 py-3 bg-purple-50 flex justify-between font-bold text-sm border-b border-purple-100 text-purple-900" onclick="toggleAcc(this)">
+        <span>3. 센서리 점수 (Score)</span> <span class="arrow text-gray-400">▲</span>
+      </button>
+      <div class="accordion-content p-4 space-y-1">
+        <div id="score-container" class="space-y-1"></div>
+        <!-- 총점 계산기 -->
+        <div class="mt-4 pt-3 border-t border-purple-200 flex justify-between items-center bg-purple-100 p-3 rounded-lg">
+          <span class="font-bold text-purple-900 text-sm">Total Score (합계 + 36)</span>
+          <span id="cup_total_score" class="font-bold text-2xl text-purple-700">84.00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Group 4: 향미 상세 -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <button type="button" class="w-full px-4 py-3 bg-gray-50 flex justify-between font-bold text-sm border-b" onclick="toggleAcc(this)">
+        <span>4. 향미 상세 (Notes & Intensity)</span> <span class="arrow text-gray-400">▲</span>
+      </button>
+      <div class="accordion-content p-4 space-y-6">
+        
+        <!-- Flavour -->
+        <div class="border-b pb-4">
+          <h4 class="text-sm font-bold text-gray-800 mb-2 border-l-4 border-blue-500 pl-2">Flavour</h4>
+          <label class="block text-[10px] font-semibold text-gray-500 mb-1">Intensity</label>
+          <div class="grid grid-cols-5 gap-1 mb-3" id="grp_fl_int">
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">Low</button>
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">Med-Low</button>
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">Medium</button>
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">Med-High</button>
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">High</button>
+          </div>
+          <div class="space-y-2">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Top Notes</label>
+              <input type="text" id="cup_fl_top" class="w-full p-2 border rounded text-xs bg-gray-50">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Extra Notes</label>
+              <input type="text" id="cup_fl_extra" class="w-full p-2 border rounded text-xs bg-gray-50">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-red-600 mb-1">Negative Notes</label>
+              <input type="text" id="cup_fl_neg" class="w-full p-2 border border-red-200 bg-red-50 rounded text-xs text-red-800">
+            </div>
+          </div>
+        </div>
+
+        <!-- Aftertaste -->
+        <div class="border-b pb-4">
+          <h4 class="text-sm font-bold text-gray-800 mb-2 border-l-4 border-blue-500 pl-2">Aftertaste</h4>
+          <label class="block text-[10px] font-semibold text-gray-500 mb-1">Intensity</label>
+          <div class="grid grid-cols-5 gap-1 mb-3" id="grp_af_int">
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">Short</button>
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">Med-Short</button>
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">Medium</button>
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">Med-Long</button>
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">Long</button>
+          </div>
+          <div class="space-y-2">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Aftertaste Notes</label>
+              <input type="text" id="cup_af_note" class="w-full p-2 border rounded text-xs bg-gray-50">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-red-600 mb-1">Negative Notes</label>
+              <input type="text" id="cup_af_neg" class="w-full p-2 border border-red-200 bg-red-50 rounded text-xs text-red-800">
+            </div>
+          </div>
+        </div>
+
+        <!-- Acidity -->
+        <div class="border-b pb-4">
+          <h4 class="text-sm font-bold text-gray-800 mb-2 border-l-4 border-yellow-500 pl-2">Acidity</h4>
+          <label class="block text-[10px] font-semibold text-gray-500 mb-1">Intensity</label>
+          <div class="grid grid-cols-5 gap-1 mb-3" id="grp_ac_int">
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">Low</button>
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">Med-Low</button>
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">Medium</button>
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">Med-High</button>
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">High</button>
+          </div>
+          <label class="block text-[10px] font-semibold text-gray-500 mb-1">Type</label>
+          <div class="grid grid-cols-3 gap-1" id="grp_ac_type">
+            <button type="button" class="select-multi py-1.5 text-[10px] border rounded bg-gray-50">Citric</button>
+            <button type="button" class="select-multi py-1.5 text-[10px] border rounded bg-gray-50">Malic</button>
+            <button type="button" class="select-multi py-1.5 text-[10px] border rounded bg-gray-50">Tartaric</button>
+            <button type="button" class="select-multi py-1.5 text-[10px] border rounded bg-gray-50">Lactic</button>
+            <button type="button" class="select-multi py-1.5 text-[10px] border rounded bg-gray-50">Acetic</button>
+            <button type="button" class="select-multi py-1.5 text-[10px] border rounded bg-gray-50">Phosphoric</button>
+            <button type="button" class="select-multi py-1.5 text-[10px] border rounded bg-gray-50">Butyric</button>
+            <button type="button" class="select-multi py-1.5 text-[10px] border rounded bg-gray-50">Succinic</button>
+            <button type="button" class="select-multi py-1.5 text-[10px] border rounded bg-gray-50">Other</button>
+          </div>
+        </div>
+
+        <!-- Sweetness -->
+        <div class="border-b pb-4">
+          <h4 class="text-sm font-bold text-gray-800 mb-2 border-l-4 border-yellow-500 pl-2">Sweetness</h4>
+          <label class="block text-[10px] font-semibold text-gray-500 mb-1">Intensity</label>
+          <div class="grid grid-cols-5 gap-1" id="grp_sw_int">
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">Low</button>
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">Med-Low</button>
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">Medium</button>
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">Med-High</button>
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">High</button>
+          </div>
+        </div>
+
+        <!-- Mouthfeel -->
+        <div class="border-b pb-4">
+          <h4 class="text-sm font-bold text-gray-800 mb-2 border-l-4 border-green-500 pl-2">Mouthfeel</h4>
+          <label class="block text-[10px] font-semibold text-gray-500 mb-1">Intensity</label>
+          <div class="grid grid-cols-5 gap-1 mb-3" id="grp_mf_int">
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">Light</button>
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">Med-Light</button>
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">Medium</button>
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">Med-Heavy</button>
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-gray-50">Heavy</button>
+          </div>
+          <div class="space-y-2">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Mouthfeel Notes</label>
+              <input type="text" id="cup_mf_note" class="w-full p-2 border rounded text-xs bg-gray-50">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-red-600 mb-1">Negative Notes</label>
+              <input type="text" id="cup_mf_neg" class="w-full p-2 border border-red-200 bg-red-50 rounded text-xs text-red-800">
+            </div>
+          </div>
+        </div>
+
+        <!-- Overall -->
+        <div>
+          <h4 class="text-sm font-bold text-gray-800 mb-2 border-l-4 border-purple-500 pl-2">Overall</h4>
+          <div class="space-y-2">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Overall Notes</label>
+              <input type="text" id="cup_ov_note" class="w-full p-2 border rounded text-xs bg-gray-50">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-red-600 mb-1">Negative Notes</label>
+              <input type="text" id="cup_ov_neg" class="w-full p-2 border border-red-200 bg-red-50 rounded text-xs text-red-800">
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Group 5: 가치 평가 -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <button type="button" class="w-full px-4 py-3 bg-gray-50 flex justify-between font-bold text-sm border-b" onclick="toggleAcc(this)">
+        <span>5. 가치 평가 (Evaluation)</span> <span class="arrow text-gray-400">▲</span>
+      </button>
+      <div class="accordion-content p-4 space-y-5">
+        
+        <div>
+          <label class="block text-xs font-semibold mb-1">Possible Roasting point</label>
+          <div class="grid grid-cols-5 gap-1" id="grp_roast_pos">
+            <button type="button" class="select-multi py-2 text-[10px] border rounded bg-gray-50">Light</button>
+            <button type="button" class="select-multi py-2 text-[10px] border rounded bg-gray-50">Med-Light</button>
+            <button type="button" class="select-multi py-2 text-[10px] border rounded bg-gray-50">Medium</button>
+            <button type="button" class="select-multi py-2 text-[10px] border rounded bg-gray-50">Med-Dark</button>
+            <button type="button" class="select-multi py-2 text-[10px] border rounded bg-gray-50">Dark</button>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1">Roasting point Recommendation</label>
+          <div class="grid grid-cols-5 gap-1" id="grp_roast_rec">
+            <button type="button" class="select-multi py-2 text-[10px] border rounded bg-gray-50">Light</button>
+            <button type="button" class="select-multi py-2 text-[10px] border rounded bg-gray-50">Med-Light</button>
+            <button type="button" class="select-multi py-2 text-[10px] border rounded bg-gray-50">Medium</button>
+            <button type="button" class="select-multi py-2 text-[10px] border rounded bg-gray-50">Med-Dark</button>
+            <button type="button" class="select-multi py-2 text-[10px] border rounded bg-gray-50">Dark</button>
+</div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-purple-700">Sensory Quality Comment</label>
+          <textarea id="cup_qualityComm" rows="3" class="w-full p-2 border rounded-lg text-sm bg-gray-50"></textarea>
+        </div>
+        
+        <div class="pt-3 border-t">
+          <label class="block text-xs font-semibold mb-1">Short Description</label>
+          <textarea id="cup_shortDesc" rows="2" class="w-full p-2 border rounded-lg text-sm bg-gray-50"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1">Price List Notes</label>
+          <input type="text" id="cup_priceNote" class="w-full p-2 border rounded-lg text-sm bg-gray-50">
+        </div>
+
+        <!-- 실시간 요약 (Unrefined & Negative) -->
+        <div class="bg-gray-100 p-3 rounded-lg border border-gray-200 mt-2">
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-[10px] font-bold text-gray-500">Unrefined Notes (실시간 수식 연산)</label>
+          </div>
+          <textarea id="preview_unrefined" readonly rows="4" class="w-full bg-transparent text-xs font-mono outline-none resize-none text-blue-800"></textarea>
+          
+          <div class="flex justify-between items-center mb-1 mt-2">
+            <label class="text-[10px] font-bold text-gray-500">Negative Notes</label>
+          </div>
+          <textarea id="preview_negative" readonly rows="2" class="w-full bg-transparent text-xs font-mono outline-none resize-none text-red-600"></textarea>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 하단 버튼 -->
+    <div class="grid grid-cols-2 gap-4 pt-4">
+      <button type="button" onclick="saveDraft()" class="w-full py-4 bg-amber-500 text-white font-bold rounded-xl shadow-md text-sm active:scale-95 transition-transform">💾 임시 저장</button>
+      <button type="button" onclick="submitForm()" class="w-full py-4 bg-purple-600 text-white font-bold rounded-xl shadow-md text-sm active:scale-95 transition-transform">🚀 검사 완료</button>
+    </div>
+  </form>
+</div>
+
+<script>
+// ==========================================
+// 초기화 및 UI 로직
+// ==========================================
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('cup_date').value = new Date().toISOString().substring(0, 10);
+  buildDefectBlocks();
+  buildCuppingScores();
+  setupInteractions();
+  
+  // 모든 폼 인터랙션 시 실시간 연산기 업데이트
+  document.getElementById('cuppingForm').addEventListener('input', updateRealtimePreview);
+  document.getElementById('cuppingForm').addEventListener('click', updateRealtimePreview);
+});
+
+function toggleAcc(button) {
+  const content = button.nextElementSibling;
+  const arrow = button.querySelector('.arrow');
+  if (content.classList.contains('closed')) {
+    content.classList.remove('closed');
+    arrow.textContent = '▲';
+  } else {
+    content.classList.add('closed');
+    arrow.textContent = '▼';
+  }
+}
+
+// 버튼 단일/다중 선택 이벤트 리스너 
+function setupInteractions() {
+  document.addEventListener('click', function(e) {
+    if(e.target && e.target.classList.contains('select-single')) {
+      const parent = e.target.parentElement;
+      parent.querySelectorAll('.select-single').forEach(b => b.classList.remove('active-btn'));
+      e.target.classList.add('active-btn');
+    }
+    if(e.target && e.target.classList.contains('select-multi')) {
+      e.target.classList.toggle('active-btn');
+    }
+  });
+}
+
+// 데이터 추출 유틸 함수
+function getValSingle(groupId) {
+  const active = document.getElementById(groupId).querySelector('.active-btn');
+  return active ? active.innerText.trim() : "";
+}
+function getValMulti(groupId) {
+  const actives = document.getElementById(groupId).querySelectorAll('.active-btn');
+  let arr = [];
+  actives.forEach(b => arr.push(b.innerText.trim()));
+  return arr.join(', ');
+}
+function val(id) { 
+  return document.getElementById(id) ? document.getElementById(id).value.trim() : ""; 
+}
+
+// ==========================================
+// 디펙트 (Group 2) 렌더링
+// ==========================================
+function buildDefectBlocks() {
+  const container = document.getElementById('defect-container');
+  // Overall과 Cup1~3 정의. 데이터 매핑을 위해 key 속성 추가
+  const blocks = [
+    {id: 'ov', title: 'Overall', kInt: 'Defect-Intensity', kTyp: 'Defect-Type'}, 
+    {id: 'c1', title: 'Cup 1', kInt: 'Defect-Intensity (Cup1)', kTyp: 'Defect-Type (Cup1)'}, 
+    {id: 'c2', title: 'Cup 2', kInt: 'Defect-Intensity (Cup2)', kTyp: 'Defect-Type (Cup2)'}, 
+    {id: 'c3', title: 'Cup 3', kInt: 'Defect-Intensity (Cup3)', kTyp: 'Defect-Type (Cup3)'}
+  ];
+  const types = ["Quaker", "Papery", "Woody", "Phenol", "Over-Fermented", "Leathery", "Stinker", "Others"];
+  
+  blocks.forEach(b => {
+    let typeBtns = types.map(t => `<button type="button" class="select-multi py-1.5 text-[10px] border rounded bg-white">${t}</button>`).join('');
+    container.innerHTML += `
+      <div class="bg-red-50 p-3 rounded-lg border border-red-100" data-kint="${b.kInt}" data-ktyp="${b.kTyp}">
+        <label class="block text-xs font-bold text-red-700 mb-2">${b.title}</label>
+        <div class="mb-2">
+          <span class="text-[10px] font-semibold text-gray-500 block mb-1">Intensity</span>
+          <div class="grid grid-cols-4 gap-1" id="grp_def_int_${b.id}">
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-white">Low</button>
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-white">Medium</button>
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-white">High</button>
+            <!-- 기본값 None은 active-btn 클래스를 미리 할당 -->
+            <button type="button" class="select-single py-1.5 text-[10px] border rounded bg-white active-btn">None</button>
+          </div>
+        </div>
+        <div>
+          <span class="text-[10px] font-semibold text-gray-500 block mb-1">Type</span>
+          <div class="grid grid-cols-4 gap-1" id="grp_def_typ_${b.id}">
+            ${typeBtns}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+// ==========================================
+// 센서리 점수 (Group 3) 렌더링
+// ==========================================
+const SCORE_FIELDS = [
+  { id: 'sc_clean', label: 'Clean Cup', key: 'Clean Cup' },
+  { id: 'sc_sweet', label: 'Sweetness', key: 'Sweetness' },
+  { id: 'sc_acid', label: 'Acidity', key: 'Acidity' },
+  { id: 'sc_mouth', label: 'Mouthfeel', key: 'Mouthfeel' },
+  { id: 'sc_flav', label: 'Flavour', key: 'Flavour' },
+  { id: 'sc_after', label: 'Aftertaste', key: 'Aftertaste' },
+  { id: 'sc_bal', label: 'Balance', key: 'Balance' },
+  { id: 'sc_over', label: 'Overall', key: 'Overall' }
+];
+
+function buildCuppingScores() {
+  const container = document.getElementById('score-container');
+  container.innerHTML = '';
+  SCORE_FIELDS.forEach(field => {
+    container.innerHTML += `
+      <div class="flex items-center justify-between p-2 border-b border-gray-100">
+        <label class="text-sm font-bold text-gray-700 w-24">${field.label}</label>
+        <div class="flex items-center gap-1">
+          <button type="button" onclick="stepScore('${field.id}', -0.25)" class="w-8 h-8 bg-gray-100 rounded text-gray-600 font-bold active:bg-gray-300">-</button>
+          <input type="number" id="${field.id}" value="6.00" step="0.25" min="0" max="8" class="w-16 text-center font-mono border rounded p-1 text-sm bg-purple-50 text-purple-900 font-bold outline-none" onchange="calcTotalScore(); updateRealtimePreview();">
+          <button type="button" onclick="stepScore('${field.id}', 0.25)" class="w-8 h-8 bg-gray-100 rounded text-gray-600 font-bold active:bg-gray-300">+</button>
+        </div>
+      </div>
+    `;
+  });
+  calcTotalScore();
+}
+
+function stepScore(id, amount) {
+  const input = document.getElementById(id);
+  let v = parseFloat(input.value) || 0;
+  v += amount;
+  if(v < 0) v = 0; if(v > 8) v = 8;
+  input.value = v.toFixed(2);
+  calcTotalScore();
+  updateRealtimePreview();
+}
+
+function calcTotalScore() {
+  let total = 36;
+  SCORE_FIELDS.forEach(f => {
+    total += parseFloat(val(f.id)) || 0;
+  });
+  document.getElementById('cup_total_score').innerText = total.toFixed(2);
+}
+
+// ==========================================
+// 실시간 연산기 (Unrefined & Negative)
+// ==========================================
+function updateRealtimePreview() {
+  // 1. Unrefined Notes
+  let unrefined = [];
+  
+  let tNote = val('cup_fl_top'), eNote = val('cup_fl_extra');
+  if(tNote) unrefined.push(`[Main Flavor] ${tNote}`);
+  else if(eNote) unrefined.push(`[Main Flavor] ${eNote}`);
+  if(tNote && eNote) unrefined.push(`[Extra Flavor] ${eNote}`);
+
+  let acInt = getValSingle('grp_ac_int'), acType = getValMulti('grp_ac_type');
+  if(acInt || acType) unrefined.push(`\n[Acidity] ${acInt} ${acType}`.trim());
+
+  let swInt = getValSingle('grp_sw_int');
+  if(swInt) unrefined.push(`\n[Sweetness] ${swInt}`);
+
+  let mfInt = getValSingle('grp_mf_int'), mfNote = val('cup_mf_note');
+  if(mfInt || mfNote) unrefined.push(`\n[Mouthfeel] ${mfInt} ${mfNote}`.trim());
+
+  let afInt = getValSingle('grp_af_int'), afNote = val('cup_af_note');
+  if(afInt || afNote) unrefined.push(`\n[Aftertaste] ${afInt} ${afNote}`.trim());
+
+  let cleanScore = parseFloat(val('sc_clean') || 0);
+  let balScore = parseFloat(val('sc_bal') || 0);
+  let ovNote = val('cup_ov_note');
+  
+  if(cleanScore >= 6.5 || balScore >= 6.5 || ovNote) {
+    let ovArr = [];
+    if(cleanScore >= 6.5) ovArr.push("Clean");
+    if(balScore >= 6.5) ovArr.push(cleanScore >= 6.5 ? "Well balanced" : "Balanced");
+    if(ovNote) ovArr.push(ovNote);
+    unrefined.push(`\n[Overall] ` + ovArr.join(", "));
+  }
+  document.getElementById('preview_unrefined').value = unrefined.join(" ").replace(/\n /g, '\n').trim();
+
+  // 2. Negative Notes
+  let negative = [];
+  if(val('cup_fl_neg')) negative.push(`[Flavour] ${val('cup_fl_neg')}`);
+  if(val('cup_af_neg')) negative.push(`[Aftertaste] ${val('cup_af_neg')}`);
+  if(val('cup_mf_neg')) negative.push(`[Mouthfeel] ${val('cup_mf_neg')}`);
+  if(val('cup_ov_neg')) negative.push(`[Overall] ${val('cup_ov_neg')}`);
+  
+  let defInt = getValSingle('grp_def_int_ov'), defType = getValMulti('grp_def_typ_ov');
+  // 인텐시티가 None이 아닐 경우에만 표기
+  if(defInt && defInt !== "None") {
+    let dStr = `[Defect] ${defInt} ${defInt&&defType?', ':''}${defType}`.trim();
+    negative.push(dStr);
+  }
+  document.getElementById('preview_negative').value = negative.join("\n").trim();
+}
+
+// ==========================================
+// 데이터 수집 및 서버 전송 (Airtable 헤더 매핑)
+// ==========================================
+function getCuppingPayload() {
+  // 앱스 스크립트의 Multi-sheet 동적 라우팅을 위한 formType 지정
+  let payload = { formType: "cupping", fields: {} };
+  
+  // G1
+  payload.fields["Coffee Name"] = val('cup_name');
+  payload.fields["Lot Code"] = val('cup_lotCode');
+  payload.fields["Lot Number"] = val('cup_lotNum');
+  payload.fields["Cupping Date"] = val('cup_date');
+  payload.fields["Roasting Profile"] = val('cup_roastProfile');
+  payload.fields["Roaster"] = getValSingle('group_roaster');
+
+  // G2 (Defects - Overall, Cup1, Cup2, Cup3)
+  ['ov', 'c1', 'c2', 'c3'].forEach(id => {
+    let block = document.getElementById('grp_def_int_' + id).parentElement.parentElement;
+    payload.fields[block.dataset.kint] = getValSingle('grp_def_int_' + id);
+    payload.fields[block.dataset.ktyp] = getValMulti('grp_def_typ_' + id);
+  });
+
+  // G3 (Scores)
+  SCORE_FIELDS.forEach(f => {
+    payload.fields[f.key] = val(f.id);
+  });
+  payload.fields["Score Detail"] = document.getElementById('cup_total_score').innerText; // 총점
+
+  // G4 (Notes)
+  payload.fields["Flavour-Intensity"] = getValSingle('grp_fl_int');
+  payload.fields["Main Flavour-Top Notes"] = val('cup_fl_top');
+  payload.fields["Flavour-Extra Notes"] = val('cup_fl_extra');
+  payload.fields["Flavour-Negative"] = val('cup_fl_neg');
+
+  payload.fields["Aftertaste-Intensity"] = getValSingle('grp_af_int');
+  payload.fields["Aftertaste-Notes"] = val('cup_af_note');
+  payload.fields["Aftertaste-Negative"] = val('cup_af_neg');
+
+  payload.fields["Acidity-Intensity"] = getValSingle('grp_ac_int');
+  payload.fields["Acidity-Type"] = getValMulti('grp_ac_type');
+
+  payload.fields["Sweetness-Intensity"] = getValSingle('grp_sw_int');
+
+  payload.fields["Mouthfeel-Intensity"] = getValSingle('grp_mf_int');
+  payload.fields["Mouthfeel-Notes"] = val('cup_mf_note');
+  payload.fields["Mouthfeel-Negative"] = val('cup_mf_neg');
+
+  payload.fields["Overall-Notes"] = val('cup_ov_note');
+  payload.fields["Overall-Negative"] = val('cup_ov_neg');
+
+  // G5
+  payload.fields["Possible Roasting point"] = getValMulti('grp_roast_pos');
+  payload.fields["Roasting point Recommendation"] = getValMulti('grp_roast_rec');
+  payload.fields["Sensory Quality Comment"] = val('cup_qualityComm');
+  payload.fields["Short description"] = val('cup_shortDesc');
+  payload.fields["Price list Notes"] = val('cup_priceNote');
+  
+  // Realtime Texts (에어테이블에 계산값이 그대로 전송되도록)
+  payload.fields["Unrefined Notes"] = val('preview_unrefined');
+  payload.fields["Negative Notes"] = val('preview_negative');
+
+  return payload;
+}
+
+function saveDraft() {
+  const data = getCuppingPayload();
+  if(!data.fields["Coffee Name"]) {
+    alert("Coffee Name을 먼저 입력해주세요.");
+    return;
+  }
+  localStorage.setItem("draft_cupping_" + data.fields["Coffee Name"], JSON.stringify(data));
+  alert("💾 임시저장이 완료되었습니다.");
+}
+
+function submitForm() {
+  const data = getCuppingPayload();
+  if(!data.fields["Coffee Name"]) {
+    alert("필수 항목(Coffee Name)을 입력해주세요.");
+    return;
+  }
+  
+  const btn = event.target;
+  const originText = btn.innerText;
+  btn.innerText = "⏳ 전송 중...";
+  btn.disabled = true;
+
+  fetch(GOOGLE_WEB_APP_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  }).then(() => {
+    alert("🚀 전송이 완료되었습니다!");
+    btn.innerText = originText;
+    btn.disabled = false;
+    localStorage.removeItem("draft_cupping_" + data.fields["Coffee Name"]);
+  }).catch(e => {
+    alert("오류 발생. 관리자에게 문의하세요.");
+    btn.innerText = originText;
+    btn.disabled = false;
+  });
+}
+</script>
+</body>
+</html>
