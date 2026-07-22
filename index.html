@@ -82,7 +82,7 @@ let loadedDraftsCache = [];
           💾 다중 일괄 저장
         </button>
         <button type="button" onclick="submitMultiForm()" class="px-3 py-2 bg-purple-600 text-white font-bold text-xs rounded-lg shadow active:scale-95">
-          🚀 다중 일괄 검사 완료
+          🚀 다중 일괄 검 완료
         </button>
       </div>
     </div>
@@ -642,6 +642,7 @@ function getCuppingPayload(status) {
 
   return payload;
 }
+
 // ==========================================
 // 구글 시트 연동 임시저장 및 서버 전송
 // ==========================================
@@ -1349,7 +1350,76 @@ function openMultiDraftModal() {
   modal.classList.remove('hidden');
 }
 
-function buildSamplePayload(i, status)
+function buildSamplePayload(i, status) {
+  const f = {};
+  
+  const container = document.querySelector(`[data-sample-idx="${i}"]`);
+  let rowId = (container && container.dataset.rowId) ? container.dataset.rowId : null;
+
+  // 💡 [다중 폼 ID 선발급] 해당 샘플에 rowId가 없다면 즉시 생성하여 DOM에 캐싱
+  if (!rowId) {
+    rowId = "ID_" + Date.now() + "_" + i; // 중복 방지를 위해 _i 추가
+    if (container) container.dataset.rowId = rowId;
+  }
+
+  // 💡 [Row ID 주입] 다중 폼에서도 시트 셀에 ID가 직접 기록되도록 강제 주입
+  f["Row_ID"] = rowId;
+  f["Row ID"] = rowId;
+
+  f["Coffee Name"] = document.getElementById(`m_name_${i}`).value.trim();
+  f["Lot Code"] = document.getElementById(`m_lotCode_${i}`).value.trim();
+  f["Lot Number"] = document.getElementById(`m_lotNum_${i}`).value.trim();
+  f["Cupping Date"] = document.getElementById(`m_date_${i}`).value;
+  f["Roasting Profile"] = document.getElementById(`m_roast_${i}`).value.trim();
+  f["Roaster"] = document.getElementById(`m_roaster_${i}`).value;
+
+  f["Clean Cup"] = document.getElementById(`m_sc_clean_${i}`).value;
+  f["Sweetness"] = document.getElementById(`m_sc_sweet_${i}`).value;
+  f["Acidity"] = document.getElementById(`m_sc_acid_${i}`).value;
+  f["Mouthfeel"] = document.getElementById(`m_sc_mouth_${i}`).value;
+  f["Flavour"] = document.getElementById(`m_sc_flav_${i}`).value;
+  f["Aftertaste"] = document.getElementById(`m_sc_after_${i}`).value;
+  f["Balance"] = document.getElementById(`m_sc_bal_${i}`).value;
+  f["Overall"] = document.getElementById(`m_sc_over_${i}`).value;
+  f["Score Detail"] = document.getElementById(`m_total_${i}`).innerText;
+
+  f["Sweetness-Intensity"] = document.getElementById(`m_sw_int_${i}`).value;
+  f["Acidity-Intensity"] = document.getElementById(`m_ac_int_${i}`).value;
+  f["Acidity-Type"] = getCheckedValues(`m_ac_type_${i}`);
+
+  f["Mouthfeel-Intensity"] = document.getElementById(`m_mf_int_${i}`).value;
+  f["Mouthfeel-Notes"] = document.getElementById(`m_mf_note_${i}`).value.trim();
+  f["Mouthfeel-Negative"] = document.getElementById(`m_mf_neg_${i}`).value.trim();
+
+  f["Aftertaste-Intensity"] = document.getElementById(`m_af_int_${i}`).value;
+  f["Aftertaste-Notes"] = document.getElementById(`m_af_note_${i}`).value.trim();
+  f["Aftertaste-Negative"] = document.getElementById(`m_af_neg_${i}`).value.trim();
+
+  f["Flavour-Intensity"] = document.getElementById(`m_fl_int_${i}`).value;
+  f["Main Flavour-Top Notes"] = document.getElementById(`m_fl_top_${i}`).value.trim();
+  f["Flavour-Extra Notes"] = document.getElementById(`m_fl_extra_${i}`).value.trim();
+  f["Flavour-Negative"] = document.getElementById(`m_fl_neg_${i}`).value.trim();
+
+  f["Defect-Intensity"] = document.getElementById(`m_def_int_ov_${i}`).value;
+  f["Defect-Type"] = getCheckedValues(`m_def_typ_ov_${i}`);
+  f["Defect-Intensity (Cup1)"] = document.getElementById(`m_def_int_c1_${i}`).value;
+  f["Defect-Type (Cup1)"] = getCheckedValues(`m_def_typ_c1_${i}`);
+  f["Defect-Intensity (Cup2)"] = document.getElementById(`m_def_int_c2_${i}`).value;
+  f["Defect-Type (Cup2)"] = getCheckedValues(`m_def_typ_c2_${i}`);
+  f["Defect-Intensity (Cup3)"] = document.getElementById(`m_def_int_c3_${i}`).value;
+  f["Defect-Type (Cup3)"] = getCheckedValues(`m_def_typ_c3_${i}`);
+
+  f["Overall-Notes"] = document.getElementById(`m_ov_note_${i}`).value.trim();
+  f["Overall-Negative"] = document.getElementById(`m_ov_neg_${i}`).value.trim();
+  f["Possible Roasting point"] = getCheckedValues(`m_roast_pos_${i}`);
+  f["Roasting point Recommendation"] = getCheckedValues(`m_roast_rec_${i}`);
+
+  f["Short description"] = document.getElementById(`m_shortDesc_${i}`).value.trim();
+  f["Price list Notes"] = document.getElementById(`m_priceNote_${i}`).value.trim();
+  f["Sensory Quality Comment"] = document.getElementById(`m_comm_${i}`).value.trim();
+
+  return { formType: "cupping", status: status, rowId: rowId, fields: f };
+}
 
 function getCheckedValues(name) {
   return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value).join(', ');
