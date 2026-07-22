@@ -933,7 +933,7 @@ function renderMultiGrid() {
   const container = document.getElementById('multiGridContainer');
   const count = parseInt(document.getElementById('multiSampleCount').value) || 6;
   
-  const intensityOpts = `<option value="">선택</option><option value="Low">Low</option><option value="Medium-Low">medium-Low</option><option value="Medium">Medium</option><option value="Medium-High">Medium-High</option><option value="High">High</option>`;
+  const intensityOpts = `<option value="">선택</option><option value="Low">Low</option><option value="Medium-Low">Medium-Low</option><option value="Medium">Medium</option><option value="Medium-High">Medium-High</option><option value="High">High</option>`;
   const afOpts = `<option value="">선택</option><option value="Short">Short</option><option value="Medium-Short">Med-Short</option><option value="Medium">Medium</option><option value="Medium-Long">Med-Long</option><option value="Long">Long</option>`;
   const mfOpts = `<option value="">선택</option><option value="Light">Light</option><option value="Medium-Light">Med-Light</option><option value="Medium">Medium</option><option value="Medium-Heavy">Med-Heavy</option><option value="Heavy">Heavy</option>`;
 const defectIntOpts = `<option value="">선택</option><option value="Low">Low</option><option value="Medium">Medium</option><option value="High">High</option><option value="None" selected>None</option>`;
@@ -1053,7 +1053,7 @@ const defectIntOpts = `<option value="">선택</option><option value="Low">Low</
               
               <div class="flex items-center gap-1">
                 <span class="w-10 text-[10px] font-semibold text-gray-600">Overall</span>
-                <select id="m_def_int_ov_${i}" class="w-16 p-0.5 border rounded bg-white text-[10px]">${intensityOpts}<option value="None" selected>None</option></select>
+                <select id="m_def_int_ov_${i}" class="w-16 p-0.5 border rounded bg-white text-[10px]">${defectIntOpts}</select>
                 <div class="relative flex-1">
                   <button type="button" id="m_def_typ_ov_btn_${i}" onclick="toggleMultiSelect('m_def_typ_ov_${i}')" class="w-full p-1 border rounded bg-white text-gray-700 font-medium text-left whitespace-normal break-words leading-tight text-[10px]">Defect 종류 <span class="float-right text-[10px]">▼</span></button>
                   <div id="m_def_typ_ov_${i}_pop" class="hidden absolute left-0 top-full mt-1 w-48 bg-white border shadow-lg rounded p-2 z-30 space-y-1">
