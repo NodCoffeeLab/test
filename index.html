@@ -576,18 +576,6 @@ function updateRealtimePreview() {
 // 데이터 수집 및 서버 전송 (단일 폼)
 // ==========================================
 function getCuppingPayload(status) {
-  // 💡 [단일 폼 ID 선발급] 저장 전 rowId가 없다면 즉시 생성하여 덮어쓰기 대비
-  if (!currentDraftRowId) {
-    currentDraftRowId = "ID_" + Date.now();
-  }
-
-  let payload = { 
-    formType: "cupping", 
-    status: status || "Completed",
-    rowId: currentDraftRowId,
-    fields: {} 
-  };
-  function getCuppingPayload(status) {
   if (!currentDraftRowId) {
     currentDraftRowId = "ID_" + Date.now();
   }
@@ -599,9 +587,10 @@ function getCuppingPayload(status) {
     fields: {} 
   };
   
-  // 💡 [여기에 추가!] 구글 시트 셀(BA열)에 ID가 직접 기록되도록 강제 주입
-  payload.fields["Row ID"] = currentDraftRowId;
+  // 구글 시트 셀에 ID 직접 기록 강제화
   payload.fields["Row_ID"] = currentDraftRowId;
+  payload.fields["Row ID"] = currentDraftRowId;
+
   payload.fields["Coffee Name"] = val('cup_name');
   payload.fields["Lot Code"] = val('cup_lotCode');
   payload.fields["Lot Number"] = val('cup_lotNum');
@@ -1366,25 +1355,15 @@ function buildSamplePayload(i, status) {
   const container = document.querySelector(`[data-sample-idx="${i}"]`);
   let rowId = (container && container.dataset.rowId) ? container.dataset.rowId : null;
 
-  // 💡 [다중 폼 ID 선발급] 해당 샘플에 rowId가 없다면 즉시 생성하여 DOM에 캐싱
-  if (!rowId) {
-    rowId = "ID_" + Date.now() + "_" + i; // 중복 방지를 위해 _i 추가
-    if (container) container.dataset.rowId = rowId;
-  }
-function buildSamplePayload(i, status) {
-  const f = {};
-  
-  const container = document.querySelector(`[data-sample-idx="${i}"]`);
-  let rowId = (container && container.dataset.rowId) ? container.dataset.rowId : null;
-
   if (!rowId) {
     rowId = "ID_" + Date.now() + "_" + i;
     if (container) container.dataset.rowId = rowId;
   }
 
-  // 💡 [여기에 추가!] 다중 폼에서도 시트 셀에 ID가 직접 기록되도록 강제 주입
-  f["Row ID"] = rowId;
+  // 구글 시트 셀에 ID 직접 기록 강제화
   f["Row_ID"] = rowId;
+  f["Row ID"] = rowId;
+
   f["Coffee Name"] = document.getElementById(`m_name_${i}`).value.trim();
   f["Lot Code"] = document.getElementById(`m_lotCode_${i}`).value.trim();
   f["Lot Number"] = document.getElementById(`m_lotNum_${i}`).value.trim();
